@@ -19,7 +19,7 @@ public class LoginController {
 
     private final UserService userService;
 
-    @GetMapping
+    @PostMapping
     public ResponseEntity<LoginResponseDto> login(
             @Valid @ModelAttribute LoginRequestDto requestDto,
             HttpServletRequest request
