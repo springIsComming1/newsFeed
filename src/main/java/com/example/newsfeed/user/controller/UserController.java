@@ -1,8 +1,12 @@
 package com.example.newsfeed.user.controller;
 
+import com.example.newsfeed.common.consts.Const;
+import com.example.newsfeed.user.dto.DeleteUserRequestDto;
 import com.example.newsfeed.user.dto.UserRequestDto;
 import com.example.newsfeed.user.dto.UserResponseDto;
 import com.example.newsfeed.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,9 +26,9 @@ public class UserController {
         return new ResponseEntity<>(save, HttpStatus.CREATED);
     }
 
-//    @DeleteMapping
-//    public ResponseEntity<Void> delete(HttpSession session){
-//        session.getAttribute(false);
-//
-//    }
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@Valid @ModelAttribute DeleteUserRequestDto requestDto) {
+        userService.delete(requestDto.getEmail(), requestDto.getPassword());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

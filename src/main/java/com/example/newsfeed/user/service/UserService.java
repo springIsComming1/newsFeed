@@ -5,6 +5,8 @@ import com.example.newsfeed.user.dto.LoginResponseDto;
 import com.example.newsfeed.user.dto.UserResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,5 +45,15 @@ public class UserService {
         User user = new User(email, encoded, name);
         User savedUser = userRepository.save(user); //유저 데이터베이스에 저장
         return new UserResponseDto(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
+    }
+
+    public void delete(String email, String password) {
+        User findedUser = userRepository.findByEmailOrElseThrow(email);
+
+        if (!encoder.matches(password, findedUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 다릅니다.");
+        }
+
+        userRepository.delete(findedUser);
     }
 }
