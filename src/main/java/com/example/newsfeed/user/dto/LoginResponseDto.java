@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class LoginResponseDto {
-
-    private final String email;
+    private Long id;
+    private String email;
 }

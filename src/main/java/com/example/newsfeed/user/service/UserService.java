@@ -5,8 +5,6 @@ import com.example.newsfeed.user.dto.LoginResponseDto;
 import com.example.newsfeed.user.dto.UserResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,14 +21,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
 
-    public LoginResponseDto login(String email, String password) {
+    public User findUser(String email, String password) {
         User findedUser = userRepository.findByEmailOrElseThrow(email); //email로 이미 가입된 유저인가 찾고 아니면 오류 던짐
 
         if(!encoder.matches(password, findedUser.getPassword())){ // 비밀번호가 저장된 것과 틀리면 오류던짐
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 혹은 비밀번호가 틀렸습니다.");
         }
 
-        return new LoginResponseDto(findedUser.getEmail());
+        return findedUser;
+    }
+
+    public LoginResponseDto getUser(String email){  //어떤 사람인지 알아와서 응답값 responseDto로 반환하는 메서드
+        User finduser = userRepository.findByEmailOrElseThrow(email);
+        return new LoginResponseDto(finduser.getId(), finduser.getEmail());
     }
 
     public UserResponseDto save(String email, String password, String name){
@@ -42,18 +45,15 @@ public class UserService {
 
         String encoded = encoder.encode(password); //비밀번호 암호화
 
-        User user = new User(email, encoded, name);
-        User savedUser = userRepository.save(user); //유저 데이터베이스에 저장
+        User user = new User(email, encoded, name); //유저 entity의 필드에 검증된 값들 대입
+        User savedUser = userRepository.save(user); //데이터베이스의 user 테이블에 저장
         return new UserResponseDto(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
     }
 
-    public void delete(String email, String password) {
-        User findedUser = userRepository.findByEmailOrElseThrow(email);
-
-        if (!encoder.matches(password, findedUser.getPassword())) {
+    public void delete(User user, String password) {
+        if (!encoder.matches(password, user.getPassword())) {   //로그인한 유저의 비밀번호와 유저가 입력한 비밀번호의 검증
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 다릅니다.");
         }
-
-        userRepository.delete(findedUser);
+        userRepository.delete(user);
     }
 }
