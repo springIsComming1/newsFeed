@@ -94,4 +94,22 @@ public class FriendService {
 
         return new ReadSelectFriendResponseDto(findFriend.getRequester().getEmail(), findFriend.getRequester().getName());
     }
+
+    // 친구 삭제 ( 유저 이메일 받아온다고 가정 )
+    @Transactional
+    public void delete(Long friendId) {
+        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun@gmail.com");
+        Long findUserId = findUser.getId();
+
+        Friend findFriend = friendRepository.findAll().stream().filter(friend ->
+                friend.getReceiver().getId() == findUserId && friend.getRequester().getId() == friendId
+        ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friend"));
+
+        FriendsRequest findFriendsRequest = friendsRequestRepository.findAll().stream().filter(friend ->
+                friend.getReceiver().getId() == findUserId && friend.getRequester().getId() == friendId
+        ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friendsRequest"));
+
+        friendRepository.delete(findFriend);
+        findFriendsRequest.setStatus("REJECTED");
+    }
 }

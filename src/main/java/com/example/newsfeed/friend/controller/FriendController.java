@@ -58,5 +58,13 @@ public class FriendController {
 
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
         }
+
+        // 친구 삭제
+        @DeleteMapping("/{friendId}")
+        public ResponseEntity<Void> delete(@PathVariable Long friendId){
+            friendService.delete(friendId);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
     }
 }
