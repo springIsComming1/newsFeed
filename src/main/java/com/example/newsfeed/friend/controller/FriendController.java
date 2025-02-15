@@ -1,6 +1,7 @@
 package com.example.newsfeed.friend.controller;
 
 import com.example.newsfeed.friend.dto.ApproveFriendResponseDto;
+import com.example.newsfeed.friend.dto.ReadFriendResponseDto;
 import com.example.newsfeed.friend.service.FriendService;
 import com.example.newsfeed.friend.dto.SaveFriendsRequestResponseDto;
 import com.example.newsfeed.friend.service.FriendsRequestService;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/friend")
@@ -40,10 +43,12 @@ public class FriendController {
             return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
         }
 
-//        // 친구 전체 조회
-//        @GetMapping
-//        public ResponseEntity<ReadFriendResponseDto> findAll(){
-//            friendService.findAll();
-//        }
+        // 친구 전체 조회
+        @GetMapping
+        public ResponseEntity<List<ReadFriendResponseDto>> findAll(){
+            List<ReadFriendResponseDto> responseDto = friendService.findAll();
+
+            return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        }
     }
 }
