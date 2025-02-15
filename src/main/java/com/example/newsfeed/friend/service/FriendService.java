@@ -1,9 +1,6 @@
 package com.example.newsfeed.friend.service;
 
-import com.example.newsfeed.friend.dto.ApproveFriendResponseDto;
-import com.example.newsfeed.friend.dto.ReadAllFriendResponseDto;
-import com.example.newsfeed.friend.dto.ReadSelectFriendResponseDto;
-import com.example.newsfeed.friend.dto.SaveFriendsRequestResponseDto;
+import com.example.newsfeed.friend.dto.*;
 import com.example.newsfeed.friend.entity.Friend;
 import com.example.newsfeed.friend.entity.FriendsRequest;
 import com.example.newsfeed.friend.repository.FriendRepository;
@@ -77,7 +74,6 @@ public class FriendService {
                     ReadAllFriendResponseDto responseDto = new ReadAllFriendResponseDto(
                             friend.getEmail()
                     );
-
                     return responseDto;
                 })
                 .collect(Collectors.toList());
@@ -111,5 +107,20 @@ public class FriendService {
 
         friendRepository.delete(findFriend);
         findFriendsRequest.setStatus("REJECTED");
+    }
+
+    // 친구 추가 ( 신청 ) 리스트 조회 => status = "PENDING" 인 애들만
+    public List<ReadFriendRequestResponseDto> findFriendRequest(Long userId) {
+        List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
+                friendsRequest.getReceiver().getId() == userId && friendsRequest.getStatus().equals("PENDING")
+        ).collect(Collectors.toList());
+
+        return findFriendsRequestList.stream()
+                .map(findFriendsRequest -> {
+                    ReadFriendRequestResponseDto readFriendRequestResponseDto = new ReadFriendRequestResponseDto(
+                            findFriendsRequest.getRequester().getEmail()
+                    );
+                    return readFriendRequestResponseDto;
+                }).collect(Collectors.toList());
     }
 }

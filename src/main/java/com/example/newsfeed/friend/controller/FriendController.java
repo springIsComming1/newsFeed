@@ -1,10 +1,7 @@
 package com.example.newsfeed.friend.controller;
 
-import com.example.newsfeed.friend.dto.ApproveFriendResponseDto;
-import com.example.newsfeed.friend.dto.ReadAllFriendResponseDto;
-import com.example.newsfeed.friend.dto.ReadSelectFriendResponseDto;
+import com.example.newsfeed.friend.dto.*;
 import com.example.newsfeed.friend.service.FriendService;
-import com.example.newsfeed.friend.dto.SaveFriendsRequestResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,10 +48,18 @@ public class FriendController {
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
         }
 
-        // 친구 선택 조회
-        @GetMapping("/{friendId}")
-        public ResponseEntity<ReadSelectFriendResponseDto> findById(@PathVariable Long friendId) {
-            ReadSelectFriendResponseDto responseDto = friendService.findById(friendId);
+        // 친구 선택 조회 => 유저 선택 조회가 따로 있으므로 필요없을 것 같습니다.
+//        @GetMapping("/{friendId}")
+//        public ResponseEntity<ReadSelectFriendResponseDto> findById(@PathVariable Long friendId) {
+//            ReadSelectFriendResponseDto responseDto = friendService.findById(friendId);
+//
+//            return new ResponseEntity<>(responseDto, HttpStatus.OK);
+//        }
+
+        // 친구 추가 ( 신청 ) 리스트 조회
+        @GetMapping("/{userId}")
+        public ResponseEntity<List<ReadFriendRequestResponseDto>> findFriendRequest(@PathVariable Long userId) {
+            List<ReadFriendRequestResponseDto> responseDto = friendService.findFriendRequest(userId);
 
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
         }
