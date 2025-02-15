@@ -1,7 +1,8 @@
 package com.example.newsfeed.friend.service;
 
 import com.example.newsfeed.friend.dto.ApproveFriendResponseDto;
-import com.example.newsfeed.friend.dto.ReadFriendResponseDto;
+import com.example.newsfeed.friend.dto.ReadAllFriendResponseDto;
+import com.example.newsfeed.friend.dto.ReadSelectFriendResponseDto;
 import com.example.newsfeed.friend.dto.SaveFriendsRequestResponseDto;
 import com.example.newsfeed.friend.entity.Friend;
 import com.example.newsfeed.friend.entity.FriendsRequest;
@@ -11,11 +12,14 @@ import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,7 +63,7 @@ public class FriendService {
     }
 
     // 친구 전체 조회 ( 유저 이메일 받아온다고 가정 )
-    public List<ReadFriendResponseDto> findAll() {
+    public List<ReadAllFriendResponseDto> findAll() {
         Long findUserId = userRepository.findUserByEmailOrElseThrow("ijieun@gmail.com").getId();
 
         List<User> friends = friendRepository.findAll().stream().filter(friend ->
@@ -70,14 +74,24 @@ public class FriendService {
 
         return friends.stream()
                 .map(friend -> {
-                    ReadFriendResponseDto responseDto = new ReadFriendResponseDto(
-                            friend.getId(),
-                            friend.getName(),
+                    ReadAllFriendResponseDto responseDto = new ReadAllFriendResponseDto(
                             friend.getEmail()
                     );
 
                     return responseDto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    // 친구 선택 조회 ( 유저 이메일 받아온다고 가정 )
+    public ReadSelectFriendResponseDto findById(Long friendId) {
+        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun@gmail.com");
+        Long findUserId = findUser.getId();
+
+        Friend findFriend = friendRepository.findAll().stream().filter(friend ->
+                friend.getReceiver().getId() == findUserId && friend.getRequester().getId() == friendId
+        ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friend"));
+
+        return new ReadSelectFriendResponseDto(findFriend.getRequester().getEmail(), findFriend.getRequester().getName());
     }
 }

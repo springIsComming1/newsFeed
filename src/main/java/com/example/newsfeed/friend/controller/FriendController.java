@@ -1,10 +1,10 @@
 package com.example.newsfeed.friend.controller;
 
 import com.example.newsfeed.friend.dto.ApproveFriendResponseDto;
-import com.example.newsfeed.friend.dto.ReadFriendResponseDto;
+import com.example.newsfeed.friend.dto.ReadAllFriendResponseDto;
+import com.example.newsfeed.friend.dto.ReadSelectFriendResponseDto;
 import com.example.newsfeed.friend.service.FriendService;
 import com.example.newsfeed.friend.dto.SaveFriendsRequestResponseDto;
-import com.example.newsfeed.friend.service.FriendsRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,8 +45,16 @@ public class FriendController {
 
         // 친구 전체 조회
         @GetMapping
-        public ResponseEntity<List<ReadFriendResponseDto>> findAll(){
-            List<ReadFriendResponseDto> responseDto = friendService.findAll();
+        public ResponseEntity<List<ReadAllFriendResponseDto>> findAll() {
+            List<ReadAllFriendResponseDto> responseDto = friendService.findAll();
+
+            return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        }
+
+        // 친구 선택 조회
+        @GetMapping("/{friendId}")
+        public ResponseEntity<ReadSelectFriendResponseDto> findById(@PathVariable Long friendId) {
+            ReadSelectFriendResponseDto responseDto = friendService.findById(friendId);
 
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
         }
