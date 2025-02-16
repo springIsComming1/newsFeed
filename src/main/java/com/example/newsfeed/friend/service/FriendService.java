@@ -56,7 +56,7 @@ public class FriendService {
         Friend friend = new Friend(findReceiver, findRequester);
         Friend savedFriend = friendRepository.save(friend);
 
-        return new ApproveFriendResponseDto(savedFriend.getReceiver(), savedFriend.getRequester(), findFriendsRequest.getStatus());
+        return new ApproveFriendResponseDto(savedFriend.getReceiver().getName(), savedFriend.getRequester().getName(), findFriendsRequest.getStatus());
     }
 
     // 친구 전체 조회 ( 유저 이메일 받아온다고 가정 )

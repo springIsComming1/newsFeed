@@ -8,9 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ApproveFriendResponseDto {
 
-    private final User receiver;
+    private final String receiverName;
 
-    private final User requester;
+    private final String requesterName;
 
     private final String status;
 }
