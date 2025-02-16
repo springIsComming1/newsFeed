@@ -2,6 +2,7 @@ package com.example.newsfeed.user.entity;
 
 import com.example.newsfeed.common.entity.BaseEntity;
 import com.example.newsfeed.friend.entity.Friend;
+import com.example.newsfeed.post.entity.Post;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -22,4 +23,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    @OneToMany(mappedBy = "user")
+    private Set<Post> posts;
 }

@@ -5,6 +5,7 @@ import com.example.newsfeed.friend.entity.Friend;
 import com.example.newsfeed.friend.entity.FriendsRequest;
 import com.example.newsfeed.friend.repository.FriendRepository;
 import com.example.newsfeed.friend.repository.FriendsRequestRepository;
+import com.example.newsfeed.post.entity.Post;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +80,7 @@ public class FriendService {
                 .collect(Collectors.toList());
     }
 
-    // 친구 선택 조회 ( 유저 이메일 받아온다고 가정 )
+    // 친구 선택 조회 ( 유저 이메일 받아온다고 가정 ) => 필요없을 듯
     public ReadSelectFriendResponseDto findById(Long friendId) {
         User findUser = userRepository.findUserByEmailOrElseThrow("ijieun@gmail.com");
         Long findUserId = findUser.getId();
@@ -122,5 +123,27 @@ public class FriendService {
                     );
                     return readFriendRequestResponseDto;
                 }).collect(Collectors.toList());
+    }
+
+    // 친구의 게시물을 최신순으로 보기 ( 유저 이메일 받아온다고 가정 )
+    public List<List<ReadFriendPostResponseDto>> findAllFriendPost() {
+        String userEmail = "ijieun@gmail.com";
+
+        List<Friend> friendList = friendRepository.findAll().stream().filter(friend ->
+                friend.getReceiver().getEmail().equals(userEmail)
+        ).collect(Collectors.toList());
+
+        List<List<ReadFriendPostResponseDto>> collect = friendList.stream().map(friend ->
+                friend.getRequester().getPosts().stream().map(post -> {
+                    ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
+                            post.getTitle(),
+                            post.getContent(),
+                            post.getUser().getName()
+                    );
+                    return readFriendPostResponseDto;
+                }).collect(Collectors.toList())
+        ).collect(Collectors.toList());
+
+        return collect;
     }
 }

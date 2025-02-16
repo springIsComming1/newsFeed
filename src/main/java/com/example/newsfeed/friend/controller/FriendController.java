@@ -71,5 +71,13 @@ public class FriendController {
 
             return new ResponseEntity<>(HttpStatus.OK);
         }
+
+        // 친구의 게시물을 최신순으로 보기
+        @GetMapping("/post")
+        public ResponseEntity<List<List<ReadFriendPostResponseDto>>> findAllFriendPost(){
+            List<List<ReadFriendPostResponseDto>> allFriendPost = friendService.findAllFriendPost();
+
+            return new ResponseEntity<>(allFriendPost, HttpStatus.OK);
+        }
     }
 }
