@@ -139,7 +139,8 @@ public class FriendService {
                             ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
                                     post.getTitle(),
                                     post.getContent(),
-                                    post.getUser().getName()
+                                    post.getUser().getName(),
+                                    post.getModifiedAt()
                             );
                             return readFriendPostResponseDto;
                         }).collect(Collectors.toList())

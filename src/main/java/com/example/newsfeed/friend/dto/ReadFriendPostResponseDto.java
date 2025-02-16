@@ -7,6 +7,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 public class ReadFriendPostResponseDto {
@@ -16,4 +18,6 @@ public class ReadFriendPostResponseDto {
     private final String content;
 
     private final String useranme;
+
+    private final LocalDateTime modifiedAt;
 }
