@@ -125,7 +125,7 @@ public class FriendService {
 
     // 친구의 게시물을 최신순으로 보기 ( 유저 이메일 받아온다고 가정 )
     public List<List<ReadFriendPostResponseDto>> findAllFriendPost() {
-        String userEmail = "ijieun@gmail.com";
+        String userEmail = "ijieun1@gmail.com";
 
         List<Friend> friendList = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail)

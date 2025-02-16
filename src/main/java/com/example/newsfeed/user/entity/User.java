@@ -3,9 +3,7 @@ package com.example.newsfeed.user.entity;
 import com.example.newsfeed.common.entity.BaseEntity;
 import com.example.newsfeed.friend.entity.Friend;
 import com.example.newsfeed.post.entity.Post;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.Set;
@@ -23,6 +21,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Post> posts;
 }
