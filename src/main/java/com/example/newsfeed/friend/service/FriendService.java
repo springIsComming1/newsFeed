@@ -81,7 +81,7 @@ public class FriendService {
 
     // 친구 선택 조회 ( 유저 이메일 받아온다고 가정 ) => 필요없을 듯
     public ReadSelectFriendResponseDto findById(Long friendId) {
-        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun@gmail.com");
+        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun1@gmail.com");
         Long findUserId = findUser.getId();
 
         Friend findFriend = friendRepository.findAll().stream().filter(friend ->
@@ -94,15 +94,14 @@ public class FriendService {
     // 친구 삭제 ( 유저 이메일 받아온다고 가정 )
     @Transactional
     public void delete(Long friendId) {
-        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun@gmail.com");
-        Long findUserId = findUser.getId();
+        String userEmail = "ijieun1@gmail.com";
 
         Friend findFriend = friendRepository.findAll().stream().filter(friend ->
-                friend.getReceiver().getId() == findUserId && friend.getRequester().getId() == friendId
+                friend.getReceiver().getEmail().equals(userEmail) && friend.getRequester().getId() == friendId
         ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friend"));
 
         FriendsRequest findFriendsRequest = friendsRequestRepository.findAll().stream().filter(friend ->
-                friend.getReceiver().getId() == findUserId && friend.getRequester().getId() == friendId
+                friend.getReceiver().getEmail().equals(userEmail) && friend.getRequester().getId() == friendId
         ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friendsRequest"));
 
         friendRepository.delete(findFriend);
