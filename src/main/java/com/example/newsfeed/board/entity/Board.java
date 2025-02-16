@@ -1,10 +1,14 @@
 package com.example.newsfeed.board.entity;
 
 import com.example.newsfeed.common.entity.BaseEntity;
+import com.example.newsfeed.like.entity.Likes;
 import com.example.newsfeed.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,5 +29,6 @@ public class Board extends BaseEntity {
     private User user;
 
     @Setter
-    private Long likes;
+    @OneToMany(mappedBy = "board")
+    private List<Likes> likes = new ArrayList<>();
 }
