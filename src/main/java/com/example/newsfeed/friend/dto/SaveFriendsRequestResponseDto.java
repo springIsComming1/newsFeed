@@ -13,9 +13,9 @@ public class SaveFriendsRequestResponseDto {
 
     private final Long id;
 
-    private final User requester;
+    private final String requesterName;
 
-    private final User receiver;
+    private final String receiverName;
 
     private final String status;
 

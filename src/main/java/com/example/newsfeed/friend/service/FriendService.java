@@ -32,7 +32,6 @@ public class FriendService {
 
     // 친구추가 ( 친구신청 )
     public SaveFriendsRequestResponseDto save(Long requesterId, Long receiverId) {
-
         User findRequester = userRepository.findUserByIdOrElseThrow(requesterId);
         User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
         String status = "PENDING";
@@ -41,7 +40,7 @@ public class FriendService {
 
         FriendsRequest savedFriendsRequest = friendsRequestRepository.save(friendsRequest);
 
-        return new SaveFriendsRequestResponseDto(savedFriendsRequest.getId(), savedFriendsRequest.getRequester(), savedFriendsRequest.getReceiver(), savedFriendsRequest.getStatus());
+        return new SaveFriendsRequestResponseDto(savedFriendsRequest.getId(), savedFriendsRequest.getRequester().getName(), savedFriendsRequest.getReceiver().getName(), savedFriendsRequest.getStatus());
     }
 
     // 친구 수락
