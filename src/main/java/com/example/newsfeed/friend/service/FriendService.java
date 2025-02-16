@@ -61,10 +61,10 @@ public class FriendService {
 
     // 친구 전체 조회 ( 유저 이메일 받아온다고 가정 )
     public List<ReadAllFriendResponseDto> findAll() {
-        Long findUserId = userRepository.findUserByEmailOrElseThrow("ijieun@gmail.com").getId();
+        String userEmail = "ijieun1@gmail.com";
 
         List<User> friends = friendRepository.findAll().stream().filter(friend ->
-                friend.getReceiver().getId() == findUserId
+                friend.getReceiver().getEmail().equals(userEmail)
         ).map(friend ->
             friend.getRequester()
         ).collect(Collectors.toList());
