@@ -6,6 +6,7 @@ import com.example.newsfeed.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
@@ -22,5 +23,5 @@ public class User extends BaseEntity {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<Post> posts;
+    private Set<Post> posts = new LinkedHashSet<>();
 }
