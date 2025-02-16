@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -132,14 +133,16 @@ public class FriendService {
         ).collect(Collectors.toList());
 
         List<List<ReadFriendPostResponseDto>> collect = friendList.stream().map(friend ->
-                friend.getRequester().getPosts().stream().map(post -> {
-                    ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
-                            post.getTitle(),
-                            post.getContent(),
-                            post.getUser().getName()
-                    );
-                    return readFriendPostResponseDto;
-                }).collect(Collectors.toList())
+                friend.getRequester().getPosts().stream()
+                        .sorted(Comparator.comparing(Post::getModifiedAt).reversed())
+                        .map(post -> {
+                            ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
+                                    post.getTitle(),
+                                    post.getContent(),
+                                    post.getUser().getName()
+                            );
+                            return readFriendPostResponseDto;
+                        }).collect(Collectors.toList())
         ).collect(Collectors.toList());
 
         return collect;
