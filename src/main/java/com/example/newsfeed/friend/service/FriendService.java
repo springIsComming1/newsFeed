@@ -6,6 +6,7 @@ import com.example.newsfeed.friend.entity.FriendsRequest;
 import com.example.newsfeed.friend.repository.FriendRepository;
 import com.example.newsfeed.friend.repository.FriendsRequestRepository;
 import com.example.newsfeed.post.entity.Post;
+import com.example.newsfeed.post.repository.PostRepository;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +31,11 @@ public class FriendService {
     private final FriendsRequestRepository friendsRequestRepository;
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     // 친구추가 ( 친구신청 ) ( 유저 이메일 받아온다고 가정 )
     public SaveFriendsRequestResponseDto save(Long receiverId) {
-        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun2@gmail.com");
+        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun3@gmail.com");
         Long requesterId = findUser.getId();
 
         User findRequester = userRepository.findUserByIdOrElseThrow(requesterId);
@@ -100,7 +102,7 @@ public class FriendService {
         findFriendsRequest.setStatus("REJECTED");
     }
 
-    // 친구 추가 ( 신청 ) 리스트 조회 => status = "PENDING" 인 애들만
+    // 친구 추가 ( 신청 ) 리스트 조회
     public List<ReadFriendRequestResponseDto> findFriendRequest(Long userId) {
         List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
                 friendsRequest.getReceiver().getId() == userId && friendsRequest.getStatus().equals("PENDING")
@@ -116,27 +118,29 @@ public class FriendService {
     }
 
     // 친구의 게시물을 최신순으로 보기 ( 유저 이메일 받아온다고 가정 )
-    public List<List<ReadFriendPostResponseDto>> findAllFriendPost() {
+    public List<ReadFriendPostResponseDto> findAllFriendPost() {
         String userEmail = "ijieun1@gmail.com";
 
-        List<Friend> friendList = friendRepository.findAll().stream().filter(friend ->
+        List<Long> friendIdList = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail)
+        ).collect(Collectors.toList()).stream().map(friend ->
+                friend.getRequester().getId()
         ).collect(Collectors.toList());
 
-        List<List<ReadFriendPostResponseDto>> collect = friendList.stream().map(friend ->
-                friend.getRequester().getPosts().stream()
-                        .sorted(Comparator.comparing(Post::getModifiedAt).reversed())
-                        .map(post -> {
-                            ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
-                                    post.getTitle(),
-                                    post.getContent(),
-                                    post.getUser().getName(),
-                                    post.getModifiedAt()
-                            );
-                            return readFriendPostResponseDto;
-                        }).collect(Collectors.toList())
+        List<Post> postList = postRepository.findAll().stream().filter(post ->
+                friendIdList.contains(post.getUser().getId())
         ).collect(Collectors.toList());
 
-        return collect;
+        return postList.stream()
+                .sorted(Comparator.comparing(Post::getModifiedAt).reversed())
+                .map(post -> {
+                    ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
+                            post.getTitle(),
+                            post.getContent(),
+                            post.getUser().getName(),
+                            post.getCreatedAt()
+                    );
+                    return readFriendPostResponseDto;
+                }).collect(Collectors.toList());
     }
 }

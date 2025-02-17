@@ -19,5 +19,5 @@ public class ReadFriendPostResponseDto {
 
     private final String useranme;
 
-    private final LocalDateTime modifiedAt;
+    private final LocalDateTime createdAt;
 }

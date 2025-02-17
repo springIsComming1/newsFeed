@@ -2,6 +2,7 @@ package com.example.newsfeed.friend.controller;
 
 import com.example.newsfeed.friend.dto.*;
 import com.example.newsfeed.friend.service.FriendService;
+import com.example.newsfeed.post.entity.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,10 +67,10 @@ public class FriendController {
 
         // 친구의 게시물을 최신순으로 보기
         @GetMapping("/post")
-        public ResponseEntity<List<List<ReadFriendPostResponseDto>>> findAllFriendPost(){
-            List<List<ReadFriendPostResponseDto>> allFriendPost = friendService.findAllFriendPost();
+        public ResponseEntity<List<ReadFriendPostResponseDto>> findAllFriendPost(){
+            List<ReadFriendPostResponseDto> readFriendPostResponseDtoList = friendService.findAllFriendPost();
 
-            return new ResponseEntity<>(allFriendPost, HttpStatus.OK);
+            return new ResponseEntity<>(readFriendPostResponseDtoList, HttpStatus.OK);
         }
     }
 }
