@@ -20,10 +20,17 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping
-    public ResponseEntity<Void> like(HttpSession session,@Valid @RequestBody LikeRequestDto requestDto) {
+    @PostMapping("/board")
+    public ResponseEntity<Void> boardLike(HttpSession session, @Valid @RequestBody LikeRequestDto requestDto) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);  //LOGIN_USER 라는 이름의 세션 속성 가져와 USER 객체로 캐스팅
-        likeService.like(user, requestDto.getId());
+        likeService.boardLike(user, requestDto.getId());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/comment")
+    private ResponseEntity<Void> commentLike(HttpSession session, @RequestBody LikeRequestDto requestDto) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        likeService.commentLike(user, requestDto.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

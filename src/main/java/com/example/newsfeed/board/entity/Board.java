@@ -1,5 +1,6 @@
 package com.example.newsfeed.board.entity;
 
+import com.example.newsfeed.comment.entity.Comment;
 import com.example.newsfeed.common.entity.BaseEntity;
 import com.example.newsfeed.like.entity.Likes;
 import com.example.newsfeed.user.entity.User;
@@ -31,4 +32,8 @@ public class Board extends BaseEntity {
     @Setter
     @OneToMany(mappedBy = "board")
     private List<Likes> likes = new ArrayList<>();
+
+    @Setter
+    @OneToMany(mappedBy = "board")
+    private List<Comment> comments = new ArrayList<>();
 }
