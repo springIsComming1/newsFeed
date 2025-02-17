@@ -36,13 +36,12 @@ public class FriendService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    // 친구추가 ( 친구신청 ) ( 유저 이메일 받아온다고 가정 )
-    public SaveFriendsRequestResponseDto save(Long receiverId) {
-        User findRequester = userRepository.findUserByEmailOrElseThrow("ijieun3@gmail.com");
+    // 친구추가 ( 친구신청 )
+    public SaveFriendsRequestResponseDto save(Long receiverId, User requester) {
         User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
         String status = "PENDING";
 
-        FriendsRequest friendsRequest = new FriendsRequest(findRequester, findReceiver, status);
+        FriendsRequest friendsRequest = new FriendsRequest(requester, findReceiver, status);
 
         FriendsRequest savedFriendsRequest = friendsRequestRepository.save(friendsRequest);
 
@@ -51,11 +50,13 @@ public class FriendService {
 
     // 친구 수락
     @Transactional
-    public ApproveFriendResponseDto approve(Long friendsRequestId) {
+    public ApproveFriendResponseDto approve(Long friendsRequestId, User user) {
         FriendsRequest findFriendsRequest = friendsRequestRepository.findFriendsRequestByIdOrElseThrow(friendsRequestId);
 
         User findReceiver = userRepository.findUserByIdOrElseThrow(findFriendsRequest.getReceiver().getId());
         User findRequester = userRepository.findUserByIdOrElseThrow(findFriendsRequest.getRequester().getId());
+
+        if(!findReceiver.getEmail().equals(user.getEmail())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "친구를 수락할 권한이 없습니다.");
 
         findFriendsRequest.setStatus("ACCEPTED");
 
@@ -65,9 +66,9 @@ public class FriendService {
         return new ApproveFriendResponseDto(savedFriend.getReceiver().getName(), savedFriend.getRequester().getName(), findFriendsRequest.getStatus());
     }
 
-    // 친구 전체 조회 ( 유저 이메일 받아온다고 가정 )
-    public List<ReadAllFriendResponseDto> findAll() {
-        String userEmail = "ijieun1@gmail.com";
+    // 친구 전체 조회
+    public List<ReadAllFriendResponseDto> findAll(User user) {
+        String userEmail = user.getEmail();
 
         List<User> friends = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail)
@@ -85,10 +86,10 @@ public class FriendService {
                 .collect(Collectors.toList());
     }
 
-    // 친구 삭제 ( 유저 이메일 받아온다고 가정 )
+    // 친구 삭제
     @Transactional
-    public void delete(Long friendId) {
-        String userEmail = "ijieun1@gmail.com";
+    public void delete(Long friendId, User user) {
+        String userEmail = user.getEmail();
 
         Friend findFriend = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail) && friend.getRequester().getId() == friendId
@@ -103,7 +104,9 @@ public class FriendService {
     }
 
     // 친구 추가 ( 신청 ) 리스트 조회
-    public List<ReadFriendRequestResponseDto> findFriendRequest(Long userId) {
+    public List<ReadFriendRequestResponseDto> findFriendRequest(User user) {
+        Long userId = user.getId();
+
         List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
                 friendsRequest.getReceiver().getId() == userId && friendsRequest.getStatus().equals("PENDING")
         ).collect(Collectors.toList());
@@ -117,9 +120,9 @@ public class FriendService {
                 }).collect(Collectors.toList());
     }
 
-    // 친구의 게시물을 최신순으로 보기 ( 유저 이메일 받아온다고 가정 )
-    public List<ReadFriendPostResponseDto> findAllFriendPost(Integer pageNumber, Integer pageSize) {
-        String userEmail = "ijieun1@gmail.com";
+    // 친구의 게시물을 최신순으로 보기
+    public List<ReadFriendPostResponseDto> findAllFriendPost(Integer pageNumber, Integer pageSize, User user) {
+        String userEmail = user.getEmail();
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
