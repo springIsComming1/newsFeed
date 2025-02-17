@@ -48,14 +48,6 @@ public class FriendController {
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
         }
 
-        // 친구 선택 조회 => 유저 선택 조회가 따로 있으므로 필요없을 것 같습니다.
-//        @GetMapping("/{friendId}")
-//        public ResponseEntity<ReadSelectFriendResponseDto> findById(@PathVariable Long friendId) {
-//            ReadSelectFriendResponseDto responseDto = friendService.findById(friendId);
-//
-//            return new ResponseEntity<>(responseDto, HttpStatus.OK);
-//        }
-
         // 친구 추가 ( 신청 ) 리스트 조회
         @GetMapping("/{userId}")
         public ResponseEntity<List<ReadFriendRequestResponseDto>> findFriendRequest(@PathVariable Long userId) {

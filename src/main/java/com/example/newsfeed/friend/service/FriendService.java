@@ -83,18 +83,6 @@ public class FriendService {
                 .collect(Collectors.toList());
     }
 
-    // 친구 선택 조회 ( 유저 이메일 받아온다고 가정 ) => 필요없을 듯
-    public ReadSelectFriendResponseDto findById(Long friendId) {
-        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun1@gmail.com");
-        Long findUserId = findUser.getId();
-
-        Friend findFriend = friendRepository.findAll().stream().filter(friend ->
-                friend.getReceiver().getId() == findUserId && friend.getRequester().getId() == friendId
-        ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friend"));
-
-        return new ReadSelectFriendResponseDto(findFriend.getRequester().getEmail(), findFriend.getRequester().getName());
-    }
-
     // 친구 삭제 ( 유저 이메일 받아온다고 가정 )
     @Transactional
     public void delete(Long friendId) {
