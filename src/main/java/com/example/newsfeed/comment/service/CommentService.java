@@ -2,15 +2,19 @@ package com.example.newsfeed.comment.service;
 
 import com.example.newsfeed.board.entity.Board;
 import com.example.newsfeed.board.repository.BoardRepository;
+import com.example.newsfeed.comment.dto.CommentFindAllResponseDto;
 import com.example.newsfeed.comment.dto.CommentResponseDto;
 import com.example.newsfeed.comment.entity.Comment;
 import com.example.newsfeed.comment.repository.CommentRepository;
 import com.example.newsfeed.user.entity.User;
-import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +24,38 @@ public class CommentService {
     private final BoardRepository boardRepository;
 
     public CommentResponseDto save(User user, Long boardId, String contents) {
-        Board board = boardRepository.findById(boardId)
+        Board board = boardRepository.findById(boardId) //보낸 boardId가 없을 경우 
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물이 없습니다."));
 
-        Comment comment = new Comment(contents, board, user);
+        Comment comment = new Comment(contents, board, user);   //댓글 생성자로 어느 게시글에 누가 달았는지 알려고 board, user 도 파라미터로 넣음
         commentRepository.save(comment);
         return new CommentResponseDto(comment.getId(), comment.getContents());
+    }
+
+    public List<CommentFindAllResponseDto> findAllByBoardId(Long boardId, Long userId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물이 없습니다."));    //요청한 게시물이 있는지 찾음
+
+        List<Comment> comments = commentRepository.findAllByUserIdAndBoardIdOrElseThrow(userId, board.getId());    //유저 id와 게시물 id로 어떤 게시물에 내가 댓글 작성했는지 List<Comment> 타입으로 찾음.
+        return comments.stream()
+                .sorted(Comparator.comparing(Comment::getCreatedAt).reversed()  //먼저 최신 댓글 기준으로 정렬하면서 그 다음은 수정일 기준으로 정렬.
+                        .thenComparing(Comment::getModifiedAt))
+                .map(comment -> new CommentFindAllResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
+                        comment.getId(),
+                        comment.getContents(),
+                        comment.getBoard().getId()
+                )).collect(Collectors.toList());
+    }
+
+    public List<CommentFindAllResponseDto> findAll(Long id) {
+        List<Comment> comments = commentRepository.findAllByUserIdOrElseThrow(id); //내가 작성한 댓글있나 userId로 찾아줌
+        return comments.stream()
+                .sorted(Comparator.comparing(Comment::getCreatedAt).reversed()  //먼저 최신 댓글 기준으로 정렬하면서 그 다음은 수정일 기준으로 정렬.
+                        .thenComparing(Comment::getModifiedAt))
+                .map(comment -> new CommentFindAllResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
+                        comment.getId(),
+                        comment.getContents(),
+                        comment.getBoard().getId()
+                )).toList();
     }
 }
