@@ -11,6 +11,9 @@ import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +38,7 @@ public class FriendService {
 
     // 친구추가 ( 친구신청 ) ( 유저 이메일 받아온다고 가정 )
     public SaveFriendsRequestResponseDto save(Long receiverId) {
-        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun3@gmail.com");
+        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun2@gmail.com");
         Long requesterId = findUser.getId();
 
         User findRequester = userRepository.findUserByIdOrElseThrow(requesterId);
@@ -118,8 +121,10 @@ public class FriendService {
     }
 
     // 친구의 게시물을 최신순으로 보기 ( 유저 이메일 받아온다고 가정 )
-    public List<ReadFriendPostResponseDto> findAllFriendPost() {
+    public List<ReadFriendPostResponseDto> findAllFriendPost(Integer pageNumber, Integer pageSize) {
         String userEmail = "ijieun1@gmail.com";
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         List<Long> friendIdList = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail)
@@ -127,12 +132,11 @@ public class FriendService {
                 friend.getRequester().getId()
         ).collect(Collectors.toList());
 
-        List<Post> postList = postRepository.findAll().stream().filter(post ->
+        List<Post> postList = postRepository.findAll(pageable).stream().filter(post ->
                 friendIdList.contains(post.getUser().getId())
         ).collect(Collectors.toList());
 
         return postList.stream()
-                .sorted(Comparator.comparing(Post::getModifiedAt).reversed())
                 .map(post -> {
                     ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
                             post.getTitle(),

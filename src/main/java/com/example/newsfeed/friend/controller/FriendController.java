@@ -17,7 +17,6 @@ public class FriendController {
 
     private final FriendService friendService;
 
-
     @RestController
     @RequestMapping("/friend")
     @RequiredArgsConstructor
@@ -67,8 +66,10 @@ public class FriendController {
 
         // 친구의 게시물을 최신순으로 보기
         @GetMapping("/post")
-        public ResponseEntity<List<ReadFriendPostResponseDto>> findAllFriendPost(){
-            List<ReadFriendPostResponseDto> readFriendPostResponseDtoList = friendService.findAllFriendPost();
+        public ResponseEntity<List<ReadFriendPostResponseDto>> findAllFriendPost(
+                @RequestParam Integer pageNumber, Integer pageSize
+        ){
+            List<ReadFriendPostResponseDto> readFriendPostResponseDtoList = friendService.findAllFriendPost(pageNumber, pageSize);
 
             return new ResponseEntity<>(readFriendPostResponseDtoList, HttpStatus.OK);
         }
