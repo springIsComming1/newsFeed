@@ -8,7 +8,6 @@ import com.example.newsfeed.common.consts.Const;
 import com.example.newsfeed.like.entity.Likes;
 import com.example.newsfeed.like.repository.LikeRepository;
 import com.example.newsfeed.user.entity.User;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
