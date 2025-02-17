@@ -6,6 +6,7 @@ import com.example.newsfeed.comment.dto.CommentFindAllResponseDto;
 import com.example.newsfeed.comment.dto.CommentResponseDto;
 import com.example.newsfeed.comment.entity.Comment;
 import com.example.newsfeed.comment.repository.CommentRepository;
+import com.example.newsfeed.user.dto.CommentUpdateResponseDto;
 import com.example.newsfeed.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,5 +58,19 @@ public class CommentService {
                         comment.getContents(),
                         comment.getBoard().getId()
                 )).toList();
+    }
+
+    public CommentUpdateResponseDto update(Long commentId, String contents, Long userId) {
+        Comment comment = commentRepository.findById(commentId) //댓글 id로 댓글 있나 찾기
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 없습니다."));
+
+        if(!userId.equals(comment.getUser().getId())){  //본인이 단 댓글인지 비교하는 부분
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 단 본인만 댓글의 수정이 가능합니다.");
+        }
+
+        comment.setContents(contents);  //댓글 내용 수정
+        commentRepository.save(comment);    //수정된 댓글 데이터베이스에 저장
+
+        return new CommentUpdateResponseDto(comment.getId() ,comment.getBoard().getId(), comment.getContents());
     }
 }

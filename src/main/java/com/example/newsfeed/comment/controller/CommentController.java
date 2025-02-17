@@ -3,8 +3,10 @@ package com.example.newsfeed.comment.controller;
 import com.example.newsfeed.comment.dto.CommentFindAllResponseDto;
 import com.example.newsfeed.comment.dto.CommentRequestDto;
 import com.example.newsfeed.comment.dto.CommentResponseDto;
+import com.example.newsfeed.comment.dto.CommentUpdateRequestDto;
 import com.example.newsfeed.comment.service.CommentService;
 import com.example.newsfeed.common.consts.Const;
+import com.example.newsfeed.user.dto.CommentUpdateResponseDto;
 import com.example.newsfeed.user.entity.User;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -42,5 +44,12 @@ public class CommentController {
         User user = (User) session.getAttribute(Const.LOGIN_USER);
         List<CommentFindAllResponseDto> comments = commentService.findAll(user.getId());
         return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<CommentUpdateResponseDto> update(@PathVariable Long commentId,@Valid @RequestBody CommentUpdateRequestDto requestDto) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        CommentUpdateResponseDto update = commentService.update(commentId, requestDto.getContents(), user.getId());
+        return new ResponseEntity<>(update, HttpStatus.OK);
     }
 }
