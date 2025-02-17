@@ -1,5 +1,6 @@
-package com.example.newsfeed.post.entity;
+package com.example.newsfeed.comment.entity;
 
+import com.example.newsfeed.board.entity.Board;
 import com.example.newsfeed.common.entity.BaseEntity;
 import com.example.newsfeed.user.entity.User;
 import jakarta.persistence.*;
@@ -7,28 +8,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "post")
 @Getter
 @NoArgsConstructor
-public class Post extends BaseEntity {
-
+public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
+    private String contents;
 
-    @Column(columnDefinition = "longtext")
-    private String content;
+    @ManyToOne
+    @JoinColumn(name = "board_id")
+    private Board board;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Post(String title, String content, User user) {
-        this.title = title;
-        this.content = content;
+    public Comment(String contents, Board board, User user) {
+        this.contents = contents;
+        this.board = board;
         this.user = user;
     }
 }

@@ -13,6 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class FriendsRequest extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id")
     private User requester;
