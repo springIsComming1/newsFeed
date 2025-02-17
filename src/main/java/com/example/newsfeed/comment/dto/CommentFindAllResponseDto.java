@@ -9,5 +9,5 @@ public class CommentFindAllResponseDto {
 
     private Long Id;
     private String contents;
-    private Long boardId;
+    private Long postId;
 }

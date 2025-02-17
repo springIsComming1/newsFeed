@@ -8,7 +8,7 @@ import lombok.Getter;
 public class CommentRequestDto {
 
     @NotNull
-    private Long boardId;
+    private Long postId;
 
     @NotBlank
     private String contents;

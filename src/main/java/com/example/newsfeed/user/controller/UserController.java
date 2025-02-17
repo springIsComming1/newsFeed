@@ -1,9 +1,9 @@
 package com.example.newsfeed.user.controller;
 
 import com.example.newsfeed.common.consts.Const;
-import com.example.newsfeed.user.dto.DeleteUserRequestDto;
-import com.example.newsfeed.user.dto.UserRequestDto;
-import com.example.newsfeed.user.dto.UserResponseDto;
+import com.example.newsfeed.user.dto.user.DeleteUserRequestDto;
+import com.example.newsfeed.user.dto.user.UserRequestDto;
+import com.example.newsfeed.user.dto.user.UserResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.service.UserService;
 import jakarta.servlet.http.HttpSession;

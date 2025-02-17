@@ -1,8 +1,8 @@
 package com.example.newsfeed.user.service;
 
 import com.example.newsfeed.common.config.PasswordEncoder;
-import com.example.newsfeed.user.dto.LoginResponseDto;
-import com.example.newsfeed.user.dto.UserResponseDto;
+import com.example.newsfeed.user.dto.login.LoginResponseDto;
+import com.example.newsfeed.user.dto.user.UserResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

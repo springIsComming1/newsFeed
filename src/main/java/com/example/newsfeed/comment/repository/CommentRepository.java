@@ -8,10 +8,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    List<Comment> findAllByUserIdAndBoardId(Long userId, Long boardId);
+    List<Comment> findAllByUserIdAndPostId(Long userId, Long postId);
 
-    default List<Comment> findAllByUserIdAndBoardIdOrElseThrow(Long userId, Long boardId){
-        List<Comment> comments = findAllByUserIdAndBoardId(userId, boardId);
+    default List<Comment> findAllByUserIdAndPostIdOrElseThrow(Long userId, Long postId){
+        List<Comment> comments = findAllByUserIdAndPostId(userId, postId);
 
         if (comments.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 없습니다.");

@@ -20,10 +20,10 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping("/board")
-    public ResponseEntity<Void> boardLike(HttpSession session, @Valid @RequestBody LikeRequestDto requestDto) {
+    @PostMapping("/post")
+    public ResponseEntity<Void> postLike(HttpSession session, @Valid @RequestBody LikeRequestDto requestDto) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);  //LOGIN_USER 라는 이름의 세션 속성 가져와 USER 객체로 캐스팅
-        likeService.boardLike(user, requestDto.getId());
+        likeService.postLike(user, requestDto.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

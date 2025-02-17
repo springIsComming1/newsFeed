@@ -1,7 +1,7 @@
 package com.example.newsfeed.comment.entity;
 
-import com.example.newsfeed.board.entity.Board;
 import com.example.newsfeed.common.entity.BaseEntity;
+import com.example.newsfeed.post.entity.Post;
 import com.example.newsfeed.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,16 +20,16 @@ public class Comment extends BaseEntity {
     private String contents;
 
     @ManyToOne
-    @JoinColumn(name = "board_id")
-    private Board board;
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Comment(String contents, Board board, User user) {
+    public Comment(String contents, Post post, User user) {
         this.contents = contents;
-        this.board = board;
+        this.post = post;
         this.user = user;
     }
 }

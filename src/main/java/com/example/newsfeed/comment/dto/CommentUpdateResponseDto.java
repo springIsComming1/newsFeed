@@ -1,4 +1,4 @@
-package com.example.newsfeed.user.dto;
+package com.example.newsfeed.comment.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +8,6 @@ import lombok.Getter;
 public class CommentUpdateResponseDto {
 
     private Long commentId;
-    private Long boardId;
+    private Long postId;
     private String contents;
 }

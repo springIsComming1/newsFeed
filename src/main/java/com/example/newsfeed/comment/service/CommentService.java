@@ -1,12 +1,12 @@
 package com.example.newsfeed.comment.service;
 
-import com.example.newsfeed.board.entity.Board;
-import com.example.newsfeed.board.repository.BoardRepository;
 import com.example.newsfeed.comment.dto.CommentFindAllResponseDto;
 import com.example.newsfeed.comment.dto.CommentResponseDto;
 import com.example.newsfeed.comment.entity.Comment;
 import com.example.newsfeed.comment.repository.CommentRepository;
-import com.example.newsfeed.user.dto.CommentUpdateResponseDto;
+import com.example.newsfeed.post.entity.Post;
+import com.example.newsfeed.post.repository.PostRepository;
+import com.example.newsfeed.comment.dto.CommentUpdateResponseDto;
 import com.example.newsfeed.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,29 +22,29 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final BoardRepository boardRepository;
+    private final PostRepository postRepository;
 
-    public CommentResponseDto save(User user, Long boardId, String contents) {
-        Board board = boardRepository.findById(boardId) //보낸 boardId가 없을 경우 
+    public CommentResponseDto save(User user, Long postId, String contents) {
+        Post post = postRepository.findById(postId) //보낸 postId가 없을 경우
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물이 없습니다."));
 
-        Comment comment = new Comment(contents, board, user);   //댓글 생성자로 어느 게시글에 누가 달았는지 알려고 board, user 도 파라미터로 넣음
+        Comment comment = new Comment(contents, post, user);   //댓글 생성자로 어느 게시글에 누가 달았는지 알려고 post, user 도 파라미터로 넣음
         commentRepository.save(comment);
         return new CommentResponseDto(comment.getId(), comment.getContents());
     }
 
-    public List<CommentFindAllResponseDto> findAllByBoardId(Long boardId, Long userId) {
-        Board board = boardRepository.findById(boardId)
+    public List<CommentFindAllResponseDto> findAllByPostId(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물이 없습니다."));    //요청한 게시물이 있는지 찾음
 
-        List<Comment> comments = commentRepository.findAllByUserIdAndBoardIdOrElseThrow(userId, board.getId());    //유저 id와 게시물 id로 어떤 게시물에 내가 댓글 작성했는지 List<Comment> 타입으로 찾음.
+        List<Comment> comments = commentRepository.findAllByUserIdAndPostIdOrElseThrow(userId, post.getId());    //유저 id와 게시물 id로 어떤 게시물에 내가 댓글 작성했는지 List<Comment> 타입으로 찾음.
         return comments.stream()
                 .sorted(Comparator.comparing(Comment::getCreatedAt).reversed()  //먼저 최신 댓글 기준으로 정렬하면서 그 다음은 수정일 기준으로 정렬.
                         .thenComparing(Comment::getModifiedAt))
                 .map(comment -> new CommentFindAllResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
                         comment.getId(),
                         comment.getContents(),
-                        comment.getBoard().getId()
+                        comment.getPost().getId()
                 )).collect(Collectors.toList());
     }
 
@@ -56,7 +56,7 @@ public class CommentService {
                 .map(comment -> new CommentFindAllResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
                         comment.getId(),
                         comment.getContents(),
-                        comment.getBoard().getId()
+                        comment.getPost().getId()
                 )).toList();
     }
 
@@ -71,6 +71,6 @@ public class CommentService {
         comment.setContents(contents);  //댓글 내용 수정
         commentRepository.save(comment);    //수정된 댓글 데이터베이스에 저장
 
-        return new CommentUpdateResponseDto(comment.getId() ,comment.getBoard().getId(), comment.getContents());
+        return new CommentUpdateResponseDto(comment.getId() ,comment.getPost().getId(), comment.getContents());
     }
 }
