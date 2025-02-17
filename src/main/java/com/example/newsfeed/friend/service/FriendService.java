@@ -31,8 +31,11 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
 
-    // 친구추가 ( 친구신청 )
-    public SaveFriendsRequestResponseDto save(Long requesterId, Long receiverId) {
+    // 친구추가 ( 친구신청 ) ( 유저 이메일 받아온다고 가정 )
+    public SaveFriendsRequestResponseDto save(Long receiverId) {
+        User findUser = userRepository.findUserByEmailOrElseThrow("ijieun2@gmail.com");
+        Long requesterId = findUser.getId();
+
         User findRequester = userRepository.findUserByIdOrElseThrow(requesterId);
         User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
         String status = "PENDING";

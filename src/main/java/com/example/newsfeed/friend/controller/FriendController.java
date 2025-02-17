@@ -25,9 +25,9 @@ public class FriendController {
         private final FriendService friendService;
 
         // 친구추가 ( 친구신청 )
-        @PostMapping
-        public ResponseEntity<SaveFriendsRequestResponseDto> save(@RequestParam Long requesterId, Long receiverId){
-            SaveFriendsRequestResponseDto responseDto = friendService.save(requesterId, receiverId);
+        @PostMapping("/request/{receiverId}")
+        public ResponseEntity<SaveFriendsRequestResponseDto> save(@PathVariable Long receiverId){
+            SaveFriendsRequestResponseDto responseDto = friendService.save(receiverId);
 
             return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
         }
