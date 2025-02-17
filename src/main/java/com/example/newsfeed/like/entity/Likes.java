@@ -1,8 +1,8 @@
 package com.example.newsfeed.like.entity;
 
-import com.example.newsfeed.board.entity.Board;
 import com.example.newsfeed.comment.entity.Comment;
 import com.example.newsfeed.common.entity.BaseEntity;
+import com.example.newsfeed.post.entity.Post;
 import com.example.newsfeed.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,8 +22,8 @@ public class Likes extends BaseEntity {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "board_id")
-    private Board board;
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "comment_id")
@@ -32,14 +32,14 @@ public class Likes extends BaseEntity {
     @Setter
     private String status;
 
-    public Likes(User user, Board board) {
+    public Likes(User user, Post post) {
         this.user = user;
-        this.board = board;
+        this.post = post;
     }
 
-    public Likes(User user, Board board, Comment comment) {
+    public Likes(User user, Post post, Comment comment) {
         this.user = user;
-        this.board = board;
+        this.post = post;
         this.comment = comment;
     }
 }

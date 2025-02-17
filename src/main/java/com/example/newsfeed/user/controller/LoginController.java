@@ -1,8 +1,8 @@
 package com.example.newsfeed.user.controller;
 
 import com.example.newsfeed.common.consts.Const;
-import com.example.newsfeed.user.dto.LoginRequestDto;
-import com.example.newsfeed.user.dto.LoginResponseDto;
+import com.example.newsfeed.user.dto.login.LoginRequestDto;
+import com.example.newsfeed.user.dto.login.LoginResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
