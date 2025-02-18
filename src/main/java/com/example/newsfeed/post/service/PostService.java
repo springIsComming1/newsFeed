@@ -19,6 +19,7 @@ public class PostService {
 
     private final PostRepository postRepository;
 
+
     public PostResponseDto save(Long userId, PostSaveRequestDto dto) {
         User user = User.fromUserId(userId);
         Post post = new Post(dto.getTitle(),dto.getContent(),user);//userId,제목,내용을 저장받음
@@ -55,6 +56,6 @@ public class PostService {
         int adjustedPage = (page > 0) ? page - 1 : 0;
         PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("createdAt").descending());
         Page<Post> postPage = postRepository.findAll(pageable);
-        return postPage.map(post -> new PostResponseDto(post.getId(),post.getUser().getId(),post.getTitle(),post.getContent(),post.getCreatedAt(),post.getModifiedAt()));
+        return postPage.map(post -> new PostResponseDto(post.getTitle(),post.getContent()));
     }
 }
