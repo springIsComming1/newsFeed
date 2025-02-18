@@ -70,12 +70,22 @@ public class FriendController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    // 친구 추가 ( 신청 ) 리스트 조회
-    @GetMapping("/request")
-    public ResponseEntity<List<ReadFriendRequestResponseDto>> findFriendRequest(HttpSession session) {
+    // 친구 요청을 받은 목록 조회 ( 내가 받은 요청 )
+    @GetMapping("/requests/received")
+    public ResponseEntity<List<ReadFriendRequestReceivedResponseDto>> getReceivedFriendRequests(HttpSession session) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);
 
-        List<ReadFriendRequestResponseDto> responseDto = friendService.findFriendRequest(user);
+        List<ReadFriendRequestReceivedResponseDto> responseDto = friendService.getReceivedFriendRequests(user);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 친구 요청을 보낸 목록 조회 ( 내가 보낸 요청 )
+    @GetMapping("/requests/sent")
+    public ResponseEntity<List<ReadFriendRequestSentResponseDto>> getSentFriendRequests(HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+
+        List<ReadFriendRequestSentResponseDto> responseDto = friendService.getSentFriendRequests(user);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }

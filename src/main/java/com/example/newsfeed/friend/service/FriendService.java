@@ -11,7 +11,6 @@ import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,7 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -118,8 +116,8 @@ public class FriendService {
         findFriendsRequest.setStatus("REJECTED");
     }
 
-    // 친구 추가 ( 신청 ) 리스트 조회
-    public List<ReadFriendRequestResponseDto> findFriendRequest(User user) {
+    // 친구 요청을 받은 목록 조회 ( 내가 받은 요청 )
+    public List<ReadFriendRequestReceivedResponseDto> getReceivedFriendRequests(User user) {
         Long userId = user.getId();
 
         List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
@@ -128,10 +126,27 @@ public class FriendService {
 
         return findFriendsRequestList.stream()
                 .map(findFriendsRequest -> {
-                    ReadFriendRequestResponseDto readFriendRequestResponseDto = new ReadFriendRequestResponseDto(
+                    ReadFriendRequestReceivedResponseDto readFriendRequestResponseDto = new ReadFriendRequestReceivedResponseDto(
                             findFriendsRequest.getRequester().getEmail()
                     );
                     return readFriendRequestResponseDto;
+                }).collect(Collectors.toList());
+    }
+
+    // 친구 요청을 보낸 목록 조회 ( 내가 보낸 요청 )
+    public List<ReadFriendRequestSentResponseDto> getSentFriendRequests(User user) {
+        Long userId = user.getId();
+
+        List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
+                friendsRequest.getRequester().getId() == userId && friendsRequest.getStatus().equals("PENDING")
+        ).collect(Collectors.toList());
+
+        return findFriendsRequestList.stream()
+                .map(findFriendsRequest -> {
+                    ReadFriendRequestSentResponseDto readFriendRequestSentResponseDto = new ReadFriendRequestSentResponseDto(
+                            findFriendsRequest.getReceiver().getEmail()
+                    );
+                    return readFriendRequestSentResponseDto;
                 }).collect(Collectors.toList());
     }
 
