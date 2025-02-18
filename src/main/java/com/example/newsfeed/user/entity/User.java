@@ -30,4 +30,12 @@ public class User extends BaseEntity {
         this.password = password;
         this.name = name;
     }
+
+    private User(Long id) {
+        this.id = id;
+    }
+
+    public static User fromUserId(Long id) {
+        return new User(id);
+    }
 }
