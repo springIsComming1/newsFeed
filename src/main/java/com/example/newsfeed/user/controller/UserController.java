@@ -60,7 +60,7 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<Void> delete(@Valid @ModelAttribute DeleteUserRequestDto requestDto, HttpSession session) {
-        User user = (User) session.getAttribute(Const.LOGIN_USER);  //LOGIN_USER 라는 이름의 세션 값(User 객체) 가져오기.
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
         userService.delete(user, requestDto.getPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
