@@ -31,15 +31,17 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> findAll() {
-        List<UserResponseDto> userResponseDtoList = userService.findAll();
+    public ResponseEntity<List<UserResponseDto>> findAll(HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        List<UserResponseDto> userResponseDtoList = userService.findAll(user);
 
         return new ResponseEntity<>(userResponseDtoList, HttpStatus.OK);
     }
 
-    @GetMapping("/{email}")
-    public ResponseEntity<UserResponseDto> findByEmail(@PathVariable String email) {
-        UserResponseDto userResponseDto = userService.findByEmail(email);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDto> findById(@PathVariable Long id, HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        UserResponseDto userResponseDto = userService.findById(user, id);
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
@@ -53,7 +55,6 @@ public class UserController {
     @PatchMapping("/profile/password")
     public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordRequestDto requestDto, HttpSession session) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);
-        userService.updatePassword(user, requestDto.getOldPassword(), requestDto.getNewPassword());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ReadFriendRequestResponseDto {
+public class ReadFriendRequestSentResponseDto {
 
     private final String email;
 }

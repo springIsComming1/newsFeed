@@ -1,5 +1,6 @@
 package com.example.newsfeed.friend.service;
 
+import com.example.newsfeed.common.consts.Const;
 import com.example.newsfeed.friend.dto.*;
 import com.example.newsfeed.friend.entity.Friend;
 import com.example.newsfeed.friend.entity.FriendsRequest;
@@ -19,12 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +35,11 @@ public class FriendService {
 
     // 친구추가 ( 친구신청 )
     public SaveFriendsRequestResponseDto save(Long receiverId, User requester) {
-        User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
-        String status = "PENDING";
+        if(receiverId == requester.getId()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot send a friend request to yourself.");
 
-        FriendsRequest friendsRequest = new FriendsRequest(requester, findReceiver, status);
+        User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
+
+        FriendsRequest friendsRequest = new FriendsRequest(requester, findReceiver, Const.STATUS_PENDING);
 
         FriendsRequest savedFriendsRequest = friendsRequestRepository.save(friendsRequest);
 
@@ -58,12 +56,27 @@ public class FriendService {
 
         if(!findReceiver.getEmail().equals(user.getEmail())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "친구를 수락할 권한이 없습니다.");
 
-        findFriendsRequest.setStatus("ACCEPTED");
+        findFriendsRequest.setStatus(Const.STATUS_ACCEPTED);
 
         Friend friend = new Friend(findReceiver, findRequester);
         Friend savedFriend = friendRepository.save(friend);
 
         return new ApproveFriendResponseDto(savedFriend.getReceiver().getName(), savedFriend.getRequester().getName(), findFriendsRequest.getStatus());
+    }
+
+    // 친구 거절
+    @Transactional
+    public RejectFriendResponseDto reject(Long friendsRequestId, User user) {
+        FriendsRequest findFriendsRequest = friendsRequestRepository.findFriendsRequestByIdOrElseThrow(friendsRequestId);
+
+        User findReceiver = userRepository.findUserByIdOrElseThrow(findFriendsRequest.getReceiver().getId());
+        User findRequester = userRepository.findUserByIdOrElseThrow(findFriendsRequest.getRequester().getId());
+
+        if(!findReceiver.getEmail().equals(user.getEmail())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "친구를 거절할 권한이 없습니다.");
+
+        findFriendsRequest.setStatus(Const.STATUS_REJECTED);
+
+        return new RejectFriendResponseDto(findReceiver.getName(), findRequester.getName(), findFriendsRequest.getStatus());
     }
 
     // 친구 전체 조회
@@ -100,23 +113,40 @@ public class FriendService {
         ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friendsRequest"));
 
         friendRepository.delete(findFriend);
-        findFriendsRequest.setStatus("REJECTED");
+        findFriendsRequest.setStatus(Const.STATUS_REJECTED);
     }
 
-    // 친구 추가 ( 신청 ) 리스트 조회
-    public List<ReadFriendRequestResponseDto> findFriendRequest(User user) {
+    // 친구 요청을 받은 목록 조회 ( 내가 받은 요청 )
+    public List<ReadFriendRequestReceivedResponseDto> getReceivedFriendRequests(User user) {
         Long userId = user.getId();
 
         List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
-                friendsRequest.getReceiver().getId() == userId && friendsRequest.getStatus().equals("PENDING")
+                friendsRequest.getReceiver().getId() == userId && friendsRequest.getStatus().equals(Const.STATUS_PENDING)
         ).collect(Collectors.toList());
 
         return findFriendsRequestList.stream()
                 .map(findFriendsRequest -> {
-                    ReadFriendRequestResponseDto readFriendRequestResponseDto = new ReadFriendRequestResponseDto(
+                    ReadFriendRequestReceivedResponseDto readFriendRequestResponseDto = new ReadFriendRequestReceivedResponseDto(
                             findFriendsRequest.getRequester().getEmail()
                     );
                     return readFriendRequestResponseDto;
+                }).collect(Collectors.toList());
+    }
+
+    // 친구 요청을 보낸 목록 조회 ( 내가 보낸 요청 )
+    public List<ReadFriendRequestSentResponseDto> getSentFriendRequests(User user) {
+        Long userId = user.getId();
+
+        List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
+                friendsRequest.getRequester().getId() == userId && friendsRequest.getStatus().equals(Const.STATUS_PENDING)
+        ).collect(Collectors.toList());
+
+        return findFriendsRequestList.stream()
+                .map(findFriendsRequest -> {
+                    ReadFriendRequestSentResponseDto readFriendRequestSentResponseDto = new ReadFriendRequestSentResponseDto(
+                            findFriendsRequest.getReceiver().getEmail()
+                    );
+                    return readFriendRequestSentResponseDto;
                 }).collect(Collectors.toList());
     }
 
@@ -126,17 +156,26 @@ public class FriendService {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        List<Long> friendIdList = friendRepository.findAll().stream().filter(friend ->
+        List<Long> findFriendIdList = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail)
         ).collect(Collectors.toList()).stream().map(friend ->
                 friend.getRequester().getId()
         ).collect(Collectors.toList());
 
-        List<Post> postList = postRepository.findAll(pageable).stream().filter(post ->
-                friendIdList.contains(post.getUser().getId())
+        List<Post> findPostList = postRepository.findAll().stream().filter(post ->
+                findFriendIdList.contains(post.getUser().getId())
         ).collect(Collectors.toList());
 
-        return postList.stream()
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), findPostList.size());
+
+        if(start >= findPostList.size()){
+            return List.of();
+        }
+
+        List<Post> pagedList = findPostList.subList(start, end);
+
+        return pagedList.stream()
                 .map(post -> {
                     ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
                             post.getTitle(),
@@ -146,5 +185,14 @@ public class FriendService {
                     );
                     return readFriendPostResponseDto;
                 }).collect(Collectors.toList());
+    }
+
+    //친구 여부 확인
+    public boolean isFriend(Long myUserId, Long otherUserId) {
+        List<List<Long>> friendList = friendRepository.findAll().stream()
+                .map(friend -> List.of(friend.getReceiver().getId(), friend.getRequester().getId()))
+                .collect(Collectors.toList());
+
+        return friendList.contains(List.of(myUserId, otherUserId)) || friendList.contains(List.of(otherUserId, myUserId));
     }
 }
