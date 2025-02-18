@@ -52,4 +52,11 @@ public class CommentController {
         CommentUpdateResponseDto update = commentService.update(commentId, requestDto.getContents(), user.getId());
         return new ResponseEntity<>(update, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> delete(@PathVariable Long commentId) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        commentService.delete(commentId, user.getId());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

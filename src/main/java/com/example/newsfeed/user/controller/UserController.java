@@ -1,6 +1,8 @@
 package com.example.newsfeed.user.controller;
 
 import com.example.newsfeed.common.consts.Const;
+import com.example.newsfeed.user.dto.user.UpdatePasswordRequestDto;
+import com.example.newsfeed.user.dto.user.UpdateUserRequestDto;
 import com.example.newsfeed.user.dto.user.DeleteUserRequestDto;
 import com.example.newsfeed.user.dto.user.UserRequestDto;
 import com.example.newsfeed.user.dto.user.UserResponseDto;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -24,6 +28,34 @@ public class UserController {
     public ResponseEntity<UserResponseDto> save(@Valid @RequestBody UserRequestDto requestDto) {
         UserResponseDto save = userService.save(requestDto.getEmail(), requestDto.getPassword(), requestDto.getName());
         return new ResponseEntity<>(save, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserResponseDto>> findAll() {
+        List<UserResponseDto> userResponseDtoList = userService.findAll();
+
+        return new ResponseEntity<>(userResponseDtoList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{email}")
+    public ResponseEntity<UserResponseDto> findByEmail(@PathVariable String email) {
+        UserResponseDto userResponseDto = userService.findByEmail(email);
+        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
+    }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<UserResponseDto> updateUser(@Valid @RequestBody UpdateUserRequestDto requestDto, HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        UserResponseDto userResponseDto = userService.updateUser(user, requestDto);
+        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
+    }
+
+    @PatchMapping("/profile/password")
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordRequestDto requestDto, HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        userService.updatePassword(user, requestDto.getOldPassword(), requestDto.getNewPassword());
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping

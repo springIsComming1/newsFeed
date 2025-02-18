@@ -6,6 +6,7 @@ import com.example.newsfeed.user.dto.login.LoginResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +32,15 @@ public class LoginController {
         session.setAttribute(Const.LOGIN_USER, user);   //속성 이름 : LOGIN_USER, 속성 값 : user 객체
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    //로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate(); //세션 삭제
+        }
+        return ResponseEntity.ok("Logout successful.");
     }
 }
