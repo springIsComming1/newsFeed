@@ -1,6 +1,7 @@
 package com.example.newsfeed.user.service;
 
 import com.example.newsfeed.common.config.PasswordEncoder;
+import com.example.newsfeed.friend.service.FriendService;
 import com.example.newsfeed.user.dto.login.LoginResponseDto;
 import com.example.newsfeed.user.dto.user.UpdateUserRequestDto;
 import com.example.newsfeed.user.dto.user.UserResponseDto;
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,6 +24,7 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FriendService friendService;
     private final PasswordEncoder encoder;
 
     public User findUser(String email, String password) {
@@ -54,33 +57,53 @@ public class UserService {
     }
 
     //사용자 전체조회
-    public List<UserResponseDto> findAll() {
-
-        List<User> users = userRepository.findAll();
-        return userRepository.findAll()
-                .stream()
-                .map(UserResponseDto::toDto) //User Entity -> DTO로 변환
-                .toList();
+    public List<UserResponseDto> findAll(User loggedInUser) {
+        return userRepository.findAll().stream()
+                .map(user -> friendService.isFriend(loggedInUser.getId(), user.getId())
+                        ? UserResponseDto.toDtoFriend(user)  // 친구이면 id, name, email 반환
+                        : UserResponseDto.toDtoNonFriend(user))  // 친구가 아니면 id만 반환
+                .collect(Collectors.toList());
     }
 
     //사용자 선택조회
-    public UserResponseDto findByEmail(String email) {
-        User findUser = userRepository.findByEmail(email)
+    public UserResponseDto findById(User loggedInUser, Long targetUserId) {
+        User user = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 존재하지 않습니다."));
 
-        return new UserResponseDto(findUser.getEmail());
+        return friendService.isFriend(loggedInUser.getId(), targetUserId)
+                ? UserResponseDto.toDtoFriend(user)  // 친구이면 id, name, email 반환
+                : UserResponseDto.toDtoNonFriend(user);  // 친구가 아니면 id만 반환
     }
-
 
     public UserResponseDto updateUser(User user, UpdateUserRequestDto requestDto) {
 
         //이름 입력 시 업데이트
         if(requestDto.getName() != null) {
+
+            if (requestDto.getName().isBlank()) {
+                throw new IllegalArgumentException("이름은 비워둘 수 없습니다.");
+            }
+
+            // 기존 이름과 동일한 경우 예외 처리
+            if (requestDto.getName().equals(user.getName())) {
+                throw new IllegalArgumentException("새로운 이름이 기존 이름과 동일합니다.");
+            }
+
             user.setName(requestDto.getName());
         }
 
-        //비밀번호 입력 시 업데이트
+        //이메일 입력 시 업데이트
         if(requestDto.getEmail() != null) {
+
+            if (requestDto.getEmail().isBlank()) {
+                throw new IllegalArgumentException("이메일은 비워둘 수 없습니다.");
+            }
+
+            // 기존 이메일과 동일한 경우 예외 처리
+            if (requestDto.getEmail().equals(user.getEmail())) {
+                throw new IllegalArgumentException("새로운 이메일이 기존 이메일과 동일합니다.");
+            }
+
             user.setEmail(requestDto.getEmail());
         }
 
@@ -99,12 +122,6 @@ public class UserService {
         //새 비밀번호가 기존 비밀번호와 동일하면 예외 발생
         if (encoder.matches(newPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다.");
-        }
-
-        //비밀번호 형식 검사 (최소 8자, 영문자+숫자+특수문자 포함)
-        String passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-        if (!Pattern.matches(passwordPattern, newPassword)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이며, 영문자, 숫자 및 특수문자를 포함해야 합니다.");
         }
 
         //비밀번호 암호화 후 저장
