@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/friend")
+@RequestMapping("/friends")
 @RequiredArgsConstructor
 public class FriendController {
 
@@ -33,7 +33,7 @@ public class FriendController {
     }
 
     // 친구 수락
-    @PostMapping("/{friendsRequestId}")
+    @PostMapping("/accept/{friendsRequestId}")
     public ResponseEntity<ApproveFriendResponseDto> approve(
             @PathVariable Long friendsRequestId,
             HttpSession session
@@ -43,6 +43,19 @@ public class FriendController {
         ApproveFriendResponseDto responseDto = friendService.approve(friendsRequestId, user);
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    // 친구 거절
+    @PostMapping("/reject/{friendsRequestId}")
+    public ResponseEntity<RejectFriendResponseDto> reject(
+            @PathVariable Long friendsRequestId,
+            HttpSession session
+    ) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+
+        RejectFriendResponseDto responseDto = friendService.reject(friendsRequestId, user);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     // 친구 전체 조회
@@ -57,12 +70,22 @@ public class FriendController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    // 친구 추가 ( 신청 ) 리스트 조회
-    @GetMapping("/request")
-    public ResponseEntity<List<ReadFriendRequestResponseDto>> findFriendRequest(HttpSession session) {
+    // 친구 요청을 받은 목록 조회 ( 내가 받은 요청 )
+    @GetMapping("/requests/received")
+    public ResponseEntity<List<ReadFriendRequestReceivedResponseDto>> getReceivedFriendRequests(HttpSession session) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);
 
-        List<ReadFriendRequestResponseDto> responseDto = friendService.findFriendRequest(user);
+        List<ReadFriendRequestReceivedResponseDto> responseDto = friendService.getReceivedFriendRequests(user);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 친구 요청을 보낸 목록 조회 ( 내가 보낸 요청 )
+    @GetMapping("/requests/sent")
+    public ResponseEntity<List<ReadFriendRequestSentResponseDto>> getSentFriendRequests(HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+
+        List<ReadFriendRequestSentResponseDto> responseDto = friendService.getSentFriendRequests(user);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
