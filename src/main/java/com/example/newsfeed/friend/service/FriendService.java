@@ -11,6 +11,7 @@ import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -126,17 +124,26 @@ public class FriendService {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        List<Long> friendIdList = friendRepository.findAll().stream().filter(friend ->
+        List<Long> findFriendIdList = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail)
         ).collect(Collectors.toList()).stream().map(friend ->
                 friend.getRequester().getId()
         ).collect(Collectors.toList());
 
-        List<Post> postList = postRepository.findAll(pageable).stream().filter(post ->
-                friendIdList.contains(post.getUser().getId())
+        List<Post> findPostList = postRepository.findAll().stream().filter(post ->
+                findFriendIdList.contains(post.getUser().getId())
         ).collect(Collectors.toList());
 
-        return postList.stream()
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), findPostList.size());
+
+        if(start >= findPostList.size()){
+            return List.of();
+        }
+
+        List<Post> pagedList = findPostList.subList(start, end);
+
+        return pagedList.stream()
                 .map(post -> {
                     ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
                             post.getTitle(),
