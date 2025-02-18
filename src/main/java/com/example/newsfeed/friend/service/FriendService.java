@@ -115,7 +115,7 @@ public class FriendService {
         ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friendsRequest"));
 
         friendRepository.delete(findFriend);
-        findFriendsRequest.setStatus(Const.STATUS_REJECTED);
+        friendsRequestRepository.delete(findFriendsRequest);
     }
 
     // 친구 요청을 받은 목록 조회 ( 내가 받은 요청 )
