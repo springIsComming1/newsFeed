@@ -1,6 +1,7 @@
 package com.example.newsfeed.comment.service;
 
-import com.example.newsfeed.comment.dto.CommentFindAllResponseDto;
+import com.example.newsfeed.comment.dto.CommentFindAllByPostResponseDto;
+import com.example.newsfeed.comment.dto.CommentFindAllMineResponseDto;
 import com.example.newsfeed.comment.dto.CommentResponseDto;
 import com.example.newsfeed.comment.entity.Comment;
 import com.example.newsfeed.comment.repository.CommentRepository;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +35,7 @@ public class CommentService {
         return new CommentResponseDto(comment.getId(), comment.getContents());
     }
 
-    public List<CommentFindAllResponseDto> findAllByPostId(Long postId, Long userId) {
+    public List<CommentFindAllMineResponseDto> findAllMineByPostId(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물이 없습니다."));    //요청한 게시물이 있는지 찾음
 
@@ -41,19 +43,29 @@ public class CommentService {
         return comments.stream()
                 .sorted(Comparator.comparing(Comment::getCreatedAt).reversed()  //먼저 최신 댓글 기준으로 정렬하면서 그 다음은 수정일 기준으로 정렬.
                         .thenComparing(Comment::getModifiedAt))
-                .map(comment -> new CommentFindAllResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
+                .map(comment -> new CommentFindAllMineResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
                         comment.getId(),
                         comment.getContents(),
                         comment.getPost().getId()
                 )).collect(Collectors.toList());
     }
 
-    public List<CommentFindAllResponseDto> findAll(Long id) {
+    public List<CommentFindAllByPostResponseDto> findAllByPostId(Long id) {
+        Collection<Comment> comments = commentRepository.findAllByPostId(id);
+        return comments.stream()
+                .sorted(Comparator.comparing(Comment::getCreatedAt).reversed())
+                .map(comment -> new CommentFindAllByPostResponseDto(
+                        comment.getId(),
+                        comment.getContents()
+                )).collect(Collectors.toList());
+    }
+
+    public List<CommentFindAllMineResponseDto> findAll(Long id) {
         List<Comment> comments = commentRepository.findAllByUserIdOrElseThrow(id); //내가 작성한 댓글있나 userId로 찾아줌
         return comments.stream()
                 .sorted(Comparator.comparing(Comment::getCreatedAt).reversed()  //먼저 최신 댓글 기준으로 정렬하면서 그 다음은 수정일 기준으로 정렬.
                         .thenComparing(Comment::getModifiedAt))
-                .map(comment -> new CommentFindAllResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
+                .map(comment -> new CommentFindAllMineResponseDto(  //찾은 List 타입의 댓글들을 responseDto 로 변환해서 응답
                         comment.getId(),
                         comment.getContents(),
                         comment.getPost().getId()
@@ -93,4 +105,6 @@ public class CommentService {
         // 댓글 삭제
         commentRepository.delete(comment);
     }
+
+
 }

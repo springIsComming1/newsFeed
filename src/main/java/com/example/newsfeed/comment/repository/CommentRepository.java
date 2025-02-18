@@ -19,6 +19,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
         return comments.stream().toList();
     }
+
+    List<Comment> findAllByPostId(Long id);
+
+
     List<Comment> findAllByUserId(Long id);
 
     default List<Comment> findAllByUserIdOrElseThrow(Long id){
