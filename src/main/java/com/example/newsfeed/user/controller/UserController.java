@@ -1,6 +1,8 @@
 package com.example.newsfeed.user.controller;
 
 import com.example.newsfeed.common.consts.Const;
+import com.example.newsfeed.user.dto.user.UpdatePasswordRequestDto;
+import com.example.newsfeed.user.dto.user.UpdateUserRequestDto;
 import com.example.newsfeed.user.dto.user.DeleteUserRequestDto;
 import com.example.newsfeed.user.dto.user.UserRequestDto;
 import com.example.newsfeed.user.dto.user.UserResponseDto;
@@ -12,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -26,9 +30,37 @@ public class UserController {
         return new ResponseEntity<>(save, HttpStatus.CREATED);
     }
 
+    @GetMapping
+    public ResponseEntity<List<UserResponseDto>> findAll() {
+        List<UserResponseDto> userResponseDtoList = userService.findAll();
+
+        return new ResponseEntity<>(userResponseDtoList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{email}")
+    public ResponseEntity<UserResponseDto> findByEmail(@PathVariable String email) {
+        UserResponseDto userResponseDto = userService.findByEmail(email);
+        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
+    }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<UserResponseDto> updateUser(@Valid @RequestBody UpdateUserRequestDto requestDto, HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        UserResponseDto userResponseDto = userService.updateUser(user, requestDto);
+        return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
+    }
+
+    @PatchMapping("/profile/password")
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordRequestDto requestDto, HttpSession session) {
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
+        userService.updatePassword(user, requestDto.getOldPassword(), requestDto.getNewPassword());
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @DeleteMapping
     public ResponseEntity<Void> delete(@Valid @ModelAttribute DeleteUserRequestDto requestDto, HttpSession session) {
-        User user = (User) session.getAttribute(Const.LOGIN_USER);  //LOGIN_USER 라는 이름의 세션 값(User 객체) 가져오기.
+        User user = (User) session.getAttribute(Const.LOGIN_USER);
         userService.delete(user, requestDto.getPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }

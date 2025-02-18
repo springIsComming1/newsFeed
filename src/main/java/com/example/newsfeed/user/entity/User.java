@@ -5,11 +5,13 @@ import com.example.newsfeed.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 public class User extends BaseEntity {
@@ -31,6 +33,14 @@ public class User extends BaseEntity {
         this.email = email;
         this.password = password;
         this.name = name;
+    }
+
+    private User(Long id) {
+        this.id = id;
+    }
+
+    public static User fromUserId(Long id) {
+        return new User(id);
     }
 }
 

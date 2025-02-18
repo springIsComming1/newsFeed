@@ -2,6 +2,7 @@ package com.example.newsfeed.user.service;
 
 import com.example.newsfeed.common.config.PasswordEncoder;
 import com.example.newsfeed.user.dto.login.LoginResponseDto;
+import com.example.newsfeed.user.dto.user.UpdateUserRequestDto;
 import com.example.newsfeed.user.dto.user.UserResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.repository.UserRepository;
@@ -11,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -50,10 +53,70 @@ public class UserService {
         return new UserResponseDto(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
     }
 
+    //사용자 전체조회
+    public List<UserResponseDto> findAll() {
+
+        List<User> users = userRepository.findAll();
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponseDto::toDto) //User Entity -> DTO로 변환
+                .toList();
+    }
+
+    //사용자 선택조회
+    public UserResponseDto findByEmail(String email) {
+        User findUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 존재하지 않습니다."));
+
+        return new UserResponseDto(findUser.getEmail());
+    }
+
+
+    public UserResponseDto updateUser(User user, UpdateUserRequestDto requestDto) {
+
+        //이름 입력 시 업데이트
+        if(requestDto.getName() != null) {
+            user.setName(requestDto.getName());
+        }
+
+        //비밀번호 입력 시 업데이트
+        if(requestDto.getEmail() != null) {
+            user.setEmail(requestDto.getEmail());
+        }
+
+        userRepository.save(user);
+
+        return new UserResponseDto(user.getId(), user.getName(), user.getEmail());
+    }
+
+    public void updatePassword(User user, String oldPassword, String newPassword) {
+
+        //현재 비밀번호가 일치하지 않으면 예외 발생
+        if (!encoder.matches(oldPassword, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+        }
+
+        //새 비밀번호가 기존 비밀번호와 동일하면 예외 발생
+        if (encoder.matches(newPassword, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다.");
+        }
+
+        //비밀번호 형식 검사 (최소 8자, 영문자+숫자+특수문자 포함)
+        String passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+        if (!Pattern.matches(passwordPattern, newPassword)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이며, 영문자, 숫자 및 특수문자를 포함해야 합니다.");
+        }
+
+        //비밀번호 암호화 후 저장
+        user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     public void delete(User user, String password) {
         if (!encoder.matches(password, user.getPassword())) {   //로그인한 유저의 비밀번호와 유저가 입력한 비밀번호의 검증
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 다릅니다.");
         }
         userRepository.delete(user);
     }
+
 }
