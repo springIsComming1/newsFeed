@@ -7,12 +7,10 @@ import lombok.Getter;
 @Getter
 public class UpdateUserRequestDto {
 
-    @NotBlank(message = "이름은 비워둘 수 없습니다.")
-    private String name;
+    private String name; // null 허용 → 개별 필드 업데이트 가능
 
-    @NotBlank(message = "이메일은 비워둘 수 없습니다.")
-    @Email(message = "이메일의 형식에 어긋납니다.")
-    private String email;
+    @Email(message = "이메일의 형식이 올바르지 않습니다.")
+    private String email; // 이메일 형식 검증 유지
 
     public UpdateUserRequestDto(String email, String name) {
         this.email = email;

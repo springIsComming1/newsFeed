@@ -186,4 +186,13 @@ public class FriendService {
                     return readFriendPostResponseDto;
                 }).collect(Collectors.toList());
     }
+
+    //친구 여부 확인
+    public boolean isFriend(Long myUserId, Long otherUserId) {
+        List<List<Long>> friendList = friendRepository.findAll().stream()
+                .map(friend -> List.of(friend.getReceiver().getId(), friend.getRequester().getId()))
+                .collect(Collectors.toList());
+
+        return friendList.contains(List.of(myUserId, otherUserId)) || friendList.contains(List.of(otherUserId, myUserId));
+    }
 }
