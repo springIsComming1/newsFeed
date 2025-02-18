@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CommentResponseDto {
-    private Long postId;
+    private Long id;
     private String contents;
 }

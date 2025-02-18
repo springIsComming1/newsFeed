@@ -93,5 +93,4 @@ public class CommentService {
         // 댓글 삭제
         commentRepository.delete(comment);
     }
-
 }
