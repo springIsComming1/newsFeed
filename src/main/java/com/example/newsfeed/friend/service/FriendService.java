@@ -71,17 +71,14 @@ public class FriendService {
 
     // 친구 거절
     @Transactional
-    public RejectFriendResponseDto reject(Long friendsRequestId, User user) {
+    public void reject(Long friendsRequestId, User user) {
         FriendsRequest findFriendsRequest = friendsRequestRepository.findFriendsRequestByIdOrElseThrow(friendsRequestId);
 
         User findReceiver = userRepository.findUserByIdOrElseThrow(findFriendsRequest.getReceiver().getId());
-        User findRequester = userRepository.findUserByIdOrElseThrow(findFriendsRequest.getRequester().getId());
 
         if(!findReceiver.getEmail().equals(user.getEmail())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "친구를 거절할 권한이 없습니다.");
 
-        findFriendsRequest.setStatus(Const.STATUS_REJECTED);
-
-        return new RejectFriendResponseDto(findReceiver.getName(), findRequester.getName(), findFriendsRequest.getStatus());
+        friendsRequestRepository.delete(findFriendsRequest);
     }
 
     // 친구 전체 조회

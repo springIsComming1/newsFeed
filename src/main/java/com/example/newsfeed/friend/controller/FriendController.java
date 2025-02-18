@@ -46,16 +46,16 @@ public class FriendController {
     }
 
     // 친구 거절
-    @PostMapping("/reject/{friendsRequestId}")
-    public ResponseEntity<RejectFriendResponseDto> reject(
+    @DeleteMapping("/reject/{friendsRequestId}")
+    public ResponseEntity<Void> reject(
             @PathVariable Long friendsRequestId,
             HttpSession session
     ) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);
 
-        RejectFriendResponseDto responseDto = friendService.reject(friendsRequestId, user);
+        friendService.reject(friendsRequestId, user);
 
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     // 친구 전체 조회
