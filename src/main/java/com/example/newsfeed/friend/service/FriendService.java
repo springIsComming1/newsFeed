@@ -164,9 +164,11 @@ public class FriendService {
                 friend.getRequester().getId()
         ).collect(Collectors.toList());
 
-        List<Post> findPostList = postRepository.findAll().stream().filter(post ->
-                findFriendIdList.contains(post.getUser().getId())
-        ).collect(Collectors.toList());
+        List<Post> findPostList = postRepository.findAll().stream()
+                .sorted(Comparator.comparing(Post::getCreatedAt).reversed())
+                .filter(post ->
+                        findFriendIdList.contains(post.getUser().getId())
+                ).collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), findPostList.size());
