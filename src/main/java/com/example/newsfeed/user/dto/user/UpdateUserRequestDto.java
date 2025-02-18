@@ -2,15 +2,16 @@ package com.example.newsfeed.user.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
 public class UpdateUserRequestDto {
 
-    @NotBlank(message = "이름은 비워둘 수 없습니다.")
+    @Size(min = 2, max = 18)
     private String name;
 
-    @NotBlank(message = "이메일은 비워둘 수 없습니다.")
+
     @Email(message = "이메일의 형식에 어긋납니다.")
     private String email;
 

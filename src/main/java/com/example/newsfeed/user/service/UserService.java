@@ -79,7 +79,7 @@ public class UserService {
             user.setName(requestDto.getName());
         }
 
-        //비밀번호 입력 시 업데이트
+        //이메일 입력 시 업데이트
         if(requestDto.getEmail() != null) {
             user.setEmail(requestDto.getEmail());
         }
@@ -99,12 +99,6 @@ public class UserService {
         //새 비밀번호가 기존 비밀번호와 동일하면 예외 발생
         if (encoder.matches(newPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다.");
-        }
-
-        //비밀번호 형식 검사 (최소 8자, 영문자+숫자+특수문자 포함)
-        String passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-        if (!Pattern.matches(passwordPattern, newPassword)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이며, 영문자, 숫자 및 특수문자를 포함해야 합니다.");
         }
 
         //비밀번호 암호화 후 저장

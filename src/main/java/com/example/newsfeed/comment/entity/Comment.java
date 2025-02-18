@@ -19,11 +19,12 @@ public class Comment extends BaseEntity {
     @Setter
     private String contents;
 
-    @ManyToOne
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 

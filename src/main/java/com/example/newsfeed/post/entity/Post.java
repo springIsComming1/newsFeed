@@ -1,10 +1,14 @@
 package com.example.newsfeed.post.entity;
 
+import com.example.newsfeed.comment.entity.Comment;
 import com.example.newsfeed.common.entity.BaseEntity;
 import com.example.newsfeed.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Table(name = "post")
@@ -23,9 +27,12 @@ public class Post extends BaseEntity {
     @Column(columnDefinition = "longtext")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
 
     public Post(String title, String content, User user) {
         this.title = title;

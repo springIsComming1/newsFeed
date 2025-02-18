@@ -8,23 +8,31 @@ import com.example.newsfeed.post.entity.Post;
 import com.example.newsfeed.post.repository.PostRepository;
 import com.example.newsfeed.comment.dto.CommentUpdateResponseDto;
 import com.example.newsfeed.user.entity.User;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final EntityManager entityManager;
 
+    @Transactional
     public CommentResponseDto save(User user, Long postId, String contents) {
+        user = entityManager.find(User.class, user.getId()); //영속성 컨텍스트에서 떠난 세션을 다시 찾음 Detached (분리된): 한 번은 데이터베이스에 저장되었으나, 현재 세션에서 더 이상 관리되지 않는 엔티티입니다.
+        user = entityManager.merge(user);   //
         Post post = postRepository.findById(postId) //보낸 postId가 없을 경우
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시물이 없습니다."));
 
@@ -74,7 +82,10 @@ public class CommentService {
         return new CommentUpdateResponseDto(comment.getId() ,comment.getPost().getId(), comment.getContents());
     }
 
-    public void delete(Long commentId, Long userId) {
+    @Transactional
+    public void delete(Long commentId, User user) {
+        user = entityManager.find(User.class, user.getId());
+        user = entityManager.merge(user);
         //댓글 ID로 해당 댓글 찾기 (없으면 예외 발생)
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."));
@@ -86,10 +97,11 @@ public class CommentService {
         Long postWriterId = comment.getPost().getUser().getId();
 
         //댓글 작성자 또는 게시글 작성자인 경우만 삭제 가능
-        if (!userId.equals(commentWriterId) && !userId.equals(postWriterId)) {
+        if (!user.getId().equals(commentWriterId) && !user.getId().equals(postWriterId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글 작성자 또는 게시글 작성자만 삭제할 수 있습니다.");
         }
-
+        Post post = comment.getPost();
+        post.getComments().remove(comment);
         // 댓글 삭제
         commentRepository.delete(comment);
     }

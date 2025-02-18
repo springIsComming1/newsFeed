@@ -8,6 +8,7 @@ import com.example.newsfeed.comment.service.CommentService;
 import com.example.newsfeed.common.consts.Const;
 import com.example.newsfeed.comment.dto.CommentUpdateResponseDto;
 import com.example.newsfeed.user.entity.User;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> delete(@PathVariable Long commentId) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);
-        commentService.delete(commentId, user.getId());
+        commentService.delete(commentId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
