@@ -48,4 +48,13 @@ public class PostController {
         Page<PostResponseDto> result = postService.findAllPage(page, size);
         return ResponseEntity.ok(result);
     }
+
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<Void> delete(
+            @SessionAttribute(name = Const.LOGIN_USER) Long userId,
+            @PathVariable Long id
+    ) {
+        postService.deleteById(id, userId);
+        return ResponseEntity.ok().build();
+    }
 }
