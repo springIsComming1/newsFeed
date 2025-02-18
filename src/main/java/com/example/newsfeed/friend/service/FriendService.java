@@ -1,5 +1,6 @@
 package com.example.newsfeed.friend.service;
 
+import com.example.newsfeed.common.consts.Const;
 import com.example.newsfeed.friend.dto.*;
 import com.example.newsfeed.friend.entity.Friend;
 import com.example.newsfeed.friend.entity.FriendsRequest;
@@ -37,9 +38,8 @@ public class FriendService {
         if(receiverId == requester.getId()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot send a friend request to yourself.");
 
         User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
-        String status = "PENDING";
 
-        FriendsRequest friendsRequest = new FriendsRequest(requester, findReceiver, status);
+        FriendsRequest friendsRequest = new FriendsRequest(requester, findReceiver, Const.STATUS_PENDING);
 
         FriendsRequest savedFriendsRequest = friendsRequestRepository.save(friendsRequest);
 
@@ -56,7 +56,7 @@ public class FriendService {
 
         if(!findReceiver.getEmail().equals(user.getEmail())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "친구를 수락할 권한이 없습니다.");
 
-        findFriendsRequest.setStatus("ACCEPTED");
+        findFriendsRequest.setStatus(Const.STATUS_ACCEPTED);
 
         Friend friend = new Friend(findReceiver, findRequester);
         Friend savedFriend = friendRepository.save(friend);
@@ -74,7 +74,7 @@ public class FriendService {
 
         if(!findReceiver.getEmail().equals(user.getEmail())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "친구를 거절할 권한이 없습니다.");
 
-        findFriendsRequest.setStatus("REJECTED");
+        findFriendsRequest.setStatus(Const.STATUS_REJECTED);
 
         return new RejectFriendResponseDto(findReceiver.getName(), findRequester.getName(), findFriendsRequest.getStatus());
     }
@@ -113,7 +113,7 @@ public class FriendService {
         ).findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exists friendsRequest"));
 
         friendRepository.delete(findFriend);
-        findFriendsRequest.setStatus("REJECTED");
+        findFriendsRequest.setStatus(Const.STATUS_REJECTED);
     }
 
     // 친구 요청을 받은 목록 조회 ( 내가 받은 요청 )
@@ -121,7 +121,7 @@ public class FriendService {
         Long userId = user.getId();
 
         List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
-                friendsRequest.getReceiver().getId() == userId && friendsRequest.getStatus().equals("PENDING")
+                friendsRequest.getReceiver().getId() == userId && friendsRequest.getStatus().equals(Const.STATUS_PENDING)
         ).collect(Collectors.toList());
 
         return findFriendsRequestList.stream()
@@ -138,7 +138,7 @@ public class FriendService {
         Long userId = user.getId();
 
         List<FriendsRequest> findFriendsRequestList = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
-                friendsRequest.getRequester().getId() == userId && friendsRequest.getStatus().equals("PENDING")
+                friendsRequest.getRequester().getId() == userId && friendsRequest.getStatus().equals(Const.STATUS_PENDING)
         ).collect(Collectors.toList());
 
         return findFriendsRequestList.stream()
