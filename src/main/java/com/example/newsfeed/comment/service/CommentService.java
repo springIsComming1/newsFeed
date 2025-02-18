@@ -73,4 +73,25 @@ public class CommentService {
 
         return new CommentUpdateResponseDto(comment.getId() ,comment.getPost().getId(), comment.getContents());
     }
+
+    public void delete(Long commentId, Long userId) {
+        //댓글 ID로 해당 댓글 찾기 (없으면 예외 발생)
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."));
+
+        //댓글 작성자의 ID
+        Long commentWriterId = comment.getUser().getId();
+
+        //해당 댓글이 속한 게시글의 작성자의 ID
+        Long postWriterId = comment.getPost().getUser().getId();
+
+        //댓글 작성자 또는 게시글 작성자인 경우만 삭제 가능
+        if (!userId.equals(commentWriterId) && !userId.equals(postWriterId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글 작성자 또는 게시글 작성자만 삭제할 수 있습니다.");
+        }
+
+        // 댓글 삭제
+        commentRepository.delete(comment);
+    }
+
 }
