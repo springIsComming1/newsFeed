@@ -21,7 +21,7 @@ public class PostService {
 
     public PostResponseDto save(Long userId, PostSaveRequestDto dto) {
         User user = User.fromUserId(userId);
-        Post post = new Post(user, dto.getTitle(),dto.getContent());//userId,제목,내용을 저장받음
+        Post post = new Post(dto.getTitle(),dto.getContent(),user);//userId,제목,내용을 저장받음
         postRepository.save(post);
         return new PostResponseDto(post.getId(),
                 user.getId(),post.getTitle(),post.getContent(),post.getCreatedAt(),post.getModifiedAt());
