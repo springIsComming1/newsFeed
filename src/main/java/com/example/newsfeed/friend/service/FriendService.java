@@ -36,6 +36,8 @@ public class FriendService {
 
     // 친구추가 ( 친구신청 )
     public SaveFriendsRequestResponseDto save(Long receiverId, User requester) {
+        if(receiverId == requester.getId()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot send a friend request to yourself.");
+
         User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
         String status = "PENDING";
 
