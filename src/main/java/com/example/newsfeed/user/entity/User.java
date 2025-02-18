@@ -27,9 +27,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<Post> posts = new LinkedHashSet<>();
-
     public User(String email, String password, String name) {
         this.email = email;
         this.password = password;
