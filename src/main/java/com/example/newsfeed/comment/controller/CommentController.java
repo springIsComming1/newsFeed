@@ -37,8 +37,12 @@ public class CommentController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<List<CommentFindAllByPostResponseDto>> findAllByPostId(@PathVariable Long postId){
-        List<CommentFindAllByPostResponseDto> comments = commentService.findAllByPostId(postId);
+    public ResponseEntity<PagedCommentResponseDto> findAllByPostId(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        PagedCommentResponseDto comments = commentService.findAllByPostId(postId, page, size);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
