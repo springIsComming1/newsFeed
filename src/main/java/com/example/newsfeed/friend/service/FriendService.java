@@ -37,6 +37,11 @@ public class FriendService {
     public SaveFriendsRequestResponseDto save(Long receiverId, User requester) {
         if(receiverId == requester.getId()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot send a friend request to yourself.");
 
+        Optional<FriendsRequest> findFriendsRequest = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
+                friendsRequest.getRequester().getId() == requester.getId() && friendsRequest.getReceiver().getId() == receiverId
+        ).findFirst();
+        if(findFriendsRequest.isPresent()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 친구 신청을 한 상태입니다.");
+
         User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
 
         FriendsRequest friendsRequest = new FriendsRequest(requester, findReceiver, Const.STATUS_PENDING);
