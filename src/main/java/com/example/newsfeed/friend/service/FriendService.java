@@ -166,27 +166,37 @@ public class FriendService {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
+        // 친구 Id 추출 List
         List<Long> findFriendIdList = friendRepository.findAll().stream().filter(friend ->
                 friend.getReceiver().getEmail().equals(userEmail)
         ).collect(Collectors.toList()).stream().map(friend ->
                 friend.getRequester().getId()
         ).collect(Collectors.toList());
 
+        // 친구 Id 와 동일한 포스트만 추출한 List
         List<Post> findPostList = postRepository.findAll().stream()
                 .sorted(Comparator.comparing(Post::getCreatedAt).reversed())
                 .filter(post ->
                         findFriendIdList.contains(post.getUser().getId())
                 ).collect(Collectors.toList());
 
+        // * 페이징 처리
+
+        // 요청 페이지의 시작 인덱스
         int start = (int) pageable.getOffset();
+
+        // 요청 페이지의 마지막 인덱스
         int end = Math.min(start + pageable.getPageSize(), findPostList.size());
 
+        // 없는 페이지 요청 시 빈 리스트 반환
         if(start >= findPostList.size()){
             return List.of();
         }
 
+        // 해당 범위의 데이터만 추출
         List<Post> pagedList = findPostList.subList(start, end);
 
+        // Post -> ReadFriendPostResponseDto 변환
         return pagedList.stream()
                 .map(post -> {
                     ReadFriendPostResponseDto readFriendPostResponseDto = new ReadFriendPostResponseDto(
