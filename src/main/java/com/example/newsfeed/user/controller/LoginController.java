@@ -6,7 +6,6 @@ import com.example.newsfeed.user.dto.login.LoginResponseDto;
 import com.example.newsfeed.user.entity.User;
 import com.example.newsfeed.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
