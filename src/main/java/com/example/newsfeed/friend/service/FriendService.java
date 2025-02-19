@@ -35,12 +35,20 @@ public class FriendService {
 
     // 친구추가 ( 친구신청 )
     public SaveFriendsRequestResponseDto save(Long receiverId, User requester) {
+        // 스스로에게 친구 신청을 할 경우
         if(receiverId == requester.getId()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot send a friend request to yourself.");
 
-        Optional<FriendsRequest> findFriendsRequest = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
+        // 친구 신청을 중복으로 요청할 경우
+        Optional<FriendsRequest> findFriendsRequest1 = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
                 friendsRequest.getRequester().getId() == requester.getId() && friendsRequest.getReceiver().getId() == receiverId
         ).findFirst();
-        if(findFriendsRequest.isPresent()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 친구 신청을 한 상태입니다.");
+        if(findFriendsRequest1.isPresent()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 친구 신청을 한 상태입니다.");
+
+        // 친구 신청을 서로 할 경우
+        Optional<FriendsRequest> findFriendsRequest2 = friendsRequestRepository.findAll().stream().filter(friendsRequest ->
+                friendsRequest.getReceiver().getId() == requester.getId() && friendsRequest.getRequester().getId() == receiverId
+        ).findFirst();
+        if(findFriendsRequest2.isPresent()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "서로가 친구신청을 할 수 없습니다.");
 
         User findReceiver = userRepository.findUserByIdOrElseThrow(receiverId);
 
