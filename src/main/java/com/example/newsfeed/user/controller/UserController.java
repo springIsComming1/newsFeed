@@ -55,7 +55,7 @@ public class UserController {
     @PatchMapping("/profile/password")
     public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordRequestDto requestDto, HttpSession session) {
         User user = (User) session.getAttribute(Const.LOGIN_USER);
-
+        userService.updatePassword(user, requestDto.getOldPassword(), requestDto.getNewPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
