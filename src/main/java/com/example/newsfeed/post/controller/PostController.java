@@ -8,17 +8,21 @@ import com.example.newsfeed.post.dto.response.PostUpdateResponseDto;
 import com.example.newsfeed.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("/posts")
+    @PostMapping
     public ResponseEntity<PostResponseDto> save(
             @SessionAttribute(name = Const.LOGIN_USER) Long userId,
             @RequestBody PostSaveRequestDto dto
@@ -26,7 +30,7 @@ public class PostController {
         return ResponseEntity.ok(postService.save(userId, dto));
     }
 
-    @PutMapping("/posts/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<PostUpdateResponseDto> update(
             @SessionAttribute(name = Const.LOGIN_USER) Long userId,
             @PathVariable Long id,
@@ -35,21 +39,21 @@ public class PostController {
         return ResponseEntity.ok(postService.update(id, userId, dto));
     }
 
-    @GetMapping("/posts/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<PostResponseDto> findOne(@PathVariable Long id) {
         return ResponseEntity.ok(postService.findOne(id));
     }
 
-    @GetMapping("/posts/page")
-    public ResponseEntity<Page<PostResponseDto>> findAllPage(
+    @GetMapping("/page")
+    public ResponseEntity<List<PostResponseDto>> findAllPage(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<PostResponseDto> result = postService.findAllPage(page, size);
-        return ResponseEntity.ok(result);
+        List<PostResponseDto> result = postService.findAllPage(page,size);
+        return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
-    @DeleteMapping("/posts/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @SessionAttribute(name = Const.LOGIN_USER) Long userId,
             @PathVariable Long id

@@ -9,9 +9,14 @@ import com.example.newsfeed.post.repository.PostRepository;
 import com.example.newsfeed.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,19 +33,29 @@ public class PostService {
                 user.getId(),post.getTitle(),post.getContent(),post.getCreatedAt(),post.getModifiedAt());
     }
 
+    @Transactional
     public PostUpdateResponseDto update(Long postId, Long userId, PostUpdateRequestDto dto) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않습니다."));//글의 존재여부 체크
         if (!userId.equals(post.getUser().getId())) {//로그인 되어있는 아이디가 현재 선택되어있는 게시글과 userId가 다를경우
             throw new IllegalArgumentException("자신이 작성한 글만 수정할 수 있습니다.");//오류발생
         }
-        post.update(dto.getTitle(), dto.getContent());
+        if (dto.getTitle() == null) {
+            post.update(post.getTitle(),dto.getContent());
+        }
+        else if (dto.getContent() == null) {
+            post.update(dto.getTitle(),post.getContent());
+        }
+        else {
+            post.update(dto.getTitle(),dto.getContent());
+        }
+
         return new PostUpdateResponseDto(post.getId(),post.getUser().getId(),post.getTitle(),post.getContent(),post.getCreatedAt(), post.getModifiedAt());
     }
 
     public void deleteById(Long scheduleId, Long userId) {
         Post post = postRepository.findById(scheduleId).orElseThrow(() -> new IllegalArgumentException("글이 존재하지 않습니다"));
         if (!userId.equals(post.getUser().getId())) {
-            throw new IllegalArgumentException("자신이 작성한 글만 수정할 수 있습니다.");
+            throw new IllegalArgumentException("자신이 작성한 글만 삭제할 수 있습니다.");
         }
         postRepository.delete(post);
     }
@@ -52,10 +67,26 @@ public class PostService {
                 post.getId(),post.getUser().getId(),post.getTitle(),post.getContent(),post.getCreatedAt(),post.getModifiedAt());
     }
 
-    public Page<PostResponseDto> findAllPage(int page, int size) {
-        int adjustedPage = (page > 0) ? page - 1 : 0;
-        PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("createdAt").descending());
-        Page<Post> postPage = postRepository.findAll(pageable);
-        return postPage.map(post -> new PostResponseDto(post.getTitle(),post.getContent()));
+    public List<PostResponseDto>findAllPage(Integer pageNumber,Integer pageSize) {
+
+        int adjustedPage = (pageNumber > 0) ? pageNumber -1 : 0;
+        Pageable pageable = PageRequest.of(adjustedPage,pageSize, Sort.by(Sort.Direction.DESC,"modifiedAt"));
+        List<Post> findPostList = postRepository.findAll().stream().toList();
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(),findPostList.size());
+
+        if(start >= findPostList.size()) {
+            return List.of();
+        }
+
+        List<Post> pagedList = findPostList.subList(start,end);
+
+        return pagedList.stream()
+                .map(post -> {PostResponseDto postResponseDto = new PostResponseDto(
+                        post.getTitle(),
+                        post.getContent()
+                    );
+                    return postResponseDto;
+                }).collect(Collectors.toList());
     }
 }
