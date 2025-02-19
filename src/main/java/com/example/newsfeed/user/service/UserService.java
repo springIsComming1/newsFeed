@@ -59,9 +59,16 @@ public class UserService {
     //사용자 전체조회
     public List<UserResponseDto> findAll(User loggedInUser) {
         return userRepository.findAll().stream()
-                .map(user -> friendService.isFriend(loggedInUser.getId(), user.getId())
-                        ? UserResponseDto.toDtoFriend(user)  // 친구이면 id, name, email 반환
-                        : UserResponseDto.toDtoNonFriend(user))  // 친구가 아니면 id만 반환
+                .map(user -> {
+                    //본인 조회 시 모든 정보 반환
+                    if (loggedInUser.getId().equals(user.getId())) {
+                        return UserResponseDto.toDtoFriend(user);
+                    }
+                    //친구 여부에 따라 반환 정보 달라짐
+                    return friendService.isFriend(loggedInUser.getId(), user.getId())
+                            ? UserResponseDto.toDtoFriend(user)  //친구이면 id, name, email 반환
+                            : UserResponseDto.toDtoNonFriend(user);  //친구가 아니면 id만 반환
+                })
                 .collect(Collectors.toList());
     }
 
@@ -70,9 +77,15 @@ public class UserService {
         User user = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 존재하지 않습니다."));
 
+        //본인 조회 시 모든 정보 반환
+        if (loggedInUser.getId().equals(targetUserId)) {
+            return UserResponseDto.toDtoFriend(user);
+        }
+
+        //친구 여부에 따라 반환 정보 달라짐
         return friendService.isFriend(loggedInUser.getId(), targetUserId)
-                ? UserResponseDto.toDtoFriend(user)  // 친구이면 id, name, email 반환
-                : UserResponseDto.toDtoNonFriend(user);  // 친구가 아니면 id만 반환
+                ? UserResponseDto.toDtoFriend(user)  //친구이면 id, name, email 반환
+                : UserResponseDto.toDtoNonFriend(user);  //친구가 아니면 id만 반환
     }
 
     public UserResponseDto updateUser(User user, UpdateUserRequestDto requestDto) {
@@ -84,7 +97,7 @@ public class UserService {
                 throw new IllegalArgumentException("이름은 비워둘 수 없습니다.");
             }
 
-            // 기존 이름과 동일한 경우 예외 처리
+            // 존 이름과 동일한 경우 예외 처리
             if (requestDto.getName().equals(user.getName())) {
                 throw new IllegalArgumentException("새로운 이름이 기존 이름과 동일합니다.");
             }
@@ -99,7 +112,7 @@ public class UserService {
                 throw new IllegalArgumentException("이메일은 비워둘 수 없습니다.");
             }
 
-            // 기존 이메일과 동일한 경우 예외 처리
+            //기존 이메일과 동일한 경우 예외 처리
             if (requestDto.getEmail().equals(user.getEmail())) {
                 throw new IllegalArgumentException("새로운 이메일이 기존 이메일과 동일합니다.");
             }

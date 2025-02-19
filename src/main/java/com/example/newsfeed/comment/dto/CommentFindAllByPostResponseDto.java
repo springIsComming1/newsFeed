@@ -5,9 +5,8 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class CommentFindAllResponseDto {
+public class CommentFindAllByPostResponseDto {
 
     private Long Id;
     private String contents;
-    private Long postId;
 }

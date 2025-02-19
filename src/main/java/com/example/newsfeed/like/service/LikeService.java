@@ -45,7 +45,7 @@ public class LikeService {
         }
     }
 
-    public void commentLike(User user, Long commentId) {    
+    public void commentLike(User user, Long commentId) {
         Comment comment = commentRepository.findById(commentId) //입력한 commentId 값으로 댓글이 있는지 찾고 없으면 오류 던짐
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 없습니다"));
 

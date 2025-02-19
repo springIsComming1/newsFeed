@@ -1,3 +1,4 @@
+
 package com.example.newsfeed.like.repository;
 
 import com.example.newsfeed.like.entity.Likes;
