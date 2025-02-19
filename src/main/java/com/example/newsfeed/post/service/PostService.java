@@ -39,6 +39,9 @@ public class PostService {
         if (!userId.equals(post.getUser().getId())) {//로그인 되어있는 아이디가 현재 선택되어있는 게시글과 userId가 다를경우
             throw new IllegalArgumentException("자신이 작성한 글만 수정할 수 있습니다.");//오류발생
         }
+        if(dto.getContent() == null && dto.getTitle()==null) {
+            throw new IllegalArgumentException("제목 혹은 내용이 입력되지 않았습니다.");
+        }
         if (dto.getTitle() == null) {
             post.update(post.getTitle(),dto.getContent());
         }
@@ -46,7 +49,7 @@ public class PostService {
             post.update(dto.getTitle(),post.getContent());
         }
         else {
-            post.update(dto.getTitle(),dto.getContent());
+            post.update(dto.getTitle(), dto.getContent());
         }
 
         return new PostUpdateResponseDto(post.getId(),post.getUser().getId(),post.getTitle(),post.getContent(),post.getCreatedAt(), post.getModifiedAt());
