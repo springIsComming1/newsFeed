@@ -1,6 +1,8 @@
 package com.example.newsfeed.comment.repository;
 
 import com.example.newsfeed.comment.entity.Comment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +21,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
         return comments.stream().toList();
     }
+
+    Page<Comment> findAllByPostId(Long id, Pageable pageable);
+
+
     List<Comment> findAllByUserId(Long id);
 
     default List<Comment> findAllByUserIdOrElseThrow(Long id){
