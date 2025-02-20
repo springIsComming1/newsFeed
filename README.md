@@ -8,6 +8,8 @@
 ### API 명세서
 ![Image](https://github.com/user-attachments/assets/e9d881ba-4af2-401a-96bf-871997bcff1c)
 
+<br>
+
 ### ERD
 ![Image](https://github.com/user-attachments/assets/03015827-d94e-465f-8342-c6c7ecc97875)
 
