@@ -6,7 +6,7 @@
 <br>
 
 ### API 명세서
-
+![Image](https://github.com/user-attachments/assets/18e22b56-ffd0-45cb-a00f-1cc00ff72e7a)
 
 ### API 명세서
 
