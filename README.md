@@ -1,4 +1,4 @@
-# Newsfeed SNS Project 
+# Newsfeed Project 
 
 ### 개요
 본 프로젝트는 사용자가 프로필을 관리하고, 뉴스피드에 게시물을 작성 및 조회하며, 친구를 추가하고 상호작용할 수 있는 SNS 플랫폼입니다.
