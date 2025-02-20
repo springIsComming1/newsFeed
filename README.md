@@ -6,12 +6,12 @@
 <br>
 
 ### API 명세서
-![Image](https://github.com/user-attachments/assets/e9d881ba-4af2-401a-96bf-871997bcff1c)
+![Image](https://github.com/user-attachments/assets/989968f8-8fa7-4f67-b4f8-2c8c4091eb23)
 
 <br>
 
 ### ERD
-![Image](https://github.com/user-attachments/assets/03015827-d94e-465f-8342-c6c7ecc97875)
+![Image](https://github.com/user-attachments/assets/78ca027d-fbfc-4b81-8bc1-550aaca847d1)
 
 <br>
 
